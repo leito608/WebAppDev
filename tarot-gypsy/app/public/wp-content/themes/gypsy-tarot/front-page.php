@@ -6,6 +6,7 @@
  */
 
 get_header();
+gypsy_tarot_render_ad( 'left' );
 ?>
 <main id="main-content">
 	<section class="hero" aria-labelledby="hero-title">
@@ -122,4 +123,5 @@ get_header();
 	</section>
 </main>
 <?php
+gypsy_tarot_render_ad( 'bottom' );
 get_footer();

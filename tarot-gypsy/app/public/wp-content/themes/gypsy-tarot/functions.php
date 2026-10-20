@@ -115,12 +115,45 @@ function gypsy_tarot_register_reading_endpoint() {
 }
 add_action( 'rest_api_init', 'gypsy_tarot_register_reading_endpoint' );
 
-function gypsy_tarot_generate_reading( WP_REST_Request $request ) {
-	$nonce = $request->get_header( 'X-WP-Nonce' );
-	if ( ! $nonce || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
-		return gypsy_tarot_ai_error( 'gypsy_tarot_invalid_nonce', 'Please reload the page and try again.', 403 );
+function gypsy_tarot_visitor_count( $increment = false ) {
+	global $wpdb;
+	if ( $increment ) {
+		add_option( 'gypsy_tarot_visitor_count', 0, '', 'no' );
+		$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->options} SET option_value = option_value + 1 WHERE option_name = %s", 'gypsy_tarot_visitor_count' ) );
+		wp_cache_delete( 'gypsy_tarot_visitor_count', 'options' );
+		wp_cache_delete( 'alloptions', 'options' );
 	}
+	return (int) $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", 'gypsy_tarot_visitor_count' ) );
+}
 
+function gypsy_tarot_visitors( WP_REST_Request $request ) {
+	$response = rest_ensure_response( array( 'count' => gypsy_tarot_visitor_count( 'POST' === $request->get_method() ) ) );
+	$response->header( 'Cache-Control', 'no-store' );
+	return $response;
+}
+
+function gypsy_tarot_visitors_ajax() {
+	nocache_headers();
+	$increment = isset( $_POST['increment'] ) && '1' === $_POST['increment']; // phpcs:ignore WordPress.Security.NonceVerification
+	wp_send_json( array( 'count' => gypsy_tarot_visitor_count( $increment ) ) );
+}
+add_action( 'wp_ajax_gypsy_tarot_visitors', 'gypsy_tarot_visitors_ajax' );
+add_action( 'wp_ajax_nopriv_gypsy_tarot_visitors', 'gypsy_tarot_visitors_ajax' );
+
+function gypsy_tarot_register_visitors_endpoint() {
+	register_rest_route(
+		'gypsy-tarot/v1',
+		'/visitors',
+		array(
+			'methods'             => array( 'GET', 'POST' ),
+			'callback'            => 'gypsy_tarot_visitors',
+			'permission_callback' => '__return_true',
+		)
+	);
+}
+add_action( 'rest_api_init', 'gypsy_tarot_register_visitors_endpoint' );
+
+function gypsy_tarot_generate_reading( WP_REST_Request $request ) {
 	$question = $request->get_param( 'question' );
 	$language = $request->get_param( 'language' );
 	$topic    = $request->get_param( 'topic' );
@@ -495,6 +528,12 @@ PROMPT;
 	);
 }
 
+function gypsy_tarot_relative_rest_url( $route ) {
+	$path = wp_parse_url( home_url( '/' ), PHP_URL_PATH );
+	$path = is_string( $path ) ? trailingslashit( $path ) : '/';
+	return $path . 'index.php?rest_route=' . $route;
+}
+
 function gypsy_tarot_enqueue_assets() {
 	$theme = wp_get_theme();
 
@@ -518,11 +557,56 @@ function gypsy_tarot_enqueue_assets() {
 		'gypsyTarotConfig',
 		array(
 			'cardBaseUrl' => trailingslashit( get_theme_file_uri( '/assets/cards/' ) ),
-			'restUrl'     => esc_url_raw( rest_url( 'gypsy-tarot/v1/reading' ) ),
-			'restNonce'   => wp_create_nonce( 'wp_rest' ),
+			'restUrl'     => gypsy_tarot_relative_rest_url( '/gypsy-tarot/v1/reading' ),
+			'ajaxUrl'     => wp_make_link_relative( admin_url( 'admin-ajax.php' ) ),
+			'visitorsUrl' => gypsy_tarot_relative_rest_url( '/gypsy-tarot/v1/visitors' ),
 			'debugEnabled' => gypsy_tarot_is_local_debug(),
 			'groqEndpoint' => gypsy_tarot_is_local_debug() ? 'https://api.groq.com/openai/v1/chat/completions' : '',
 		)
 	);
 }
 add_action( 'wp_enqueue_scripts', 'gypsy_tarot_enqueue_assets' );
+
+
+/**
+ * AdSense settings. Define in wp-config.php:
+ *   define( 'GYPSY_ADSENSE_CLIENT', 'ca-pub-XXXXXXXXXXXXXXXX' );
+ *   define( 'GYPSY_ADSENSE_SLOT_LEFT', '1234567890' );   // vertical/side ad unit
+ *   define( 'GYPSY_ADSENSE_SLOT_BOTTOM', '0987654321' ); // horizontal/responsive ad unit
+ */
+function gypsy_tarot_adsense_client() {
+	return defined( 'GYPSY_ADSENSE_CLIENT' ) ? trim( (string) GYPSY_ADSENSE_CLIENT ) : 'ca-pub-8986836930601743';
+}
+
+function gypsy_tarot_adsense_head() {
+	$client = gypsy_tarot_adsense_client();
+	if ( '' === $client ) {
+		return;
+	}
+	printf(
+		'<script async src="%s" crossorigin="anonymous"></script>' . "\n",
+		esc_url( 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' . rawurlencode( $client ) )
+	);
+}
+add_action( 'wp_head', 'gypsy_tarot_adsense_head', 5 );
+
+function gypsy_tarot_render_ad( $position ) {
+	$client = gypsy_tarot_adsense_client();
+	$const  = 'GYPSY_ADSENSE_SLOT_' . strtoupper( $position );
+	$slot   = defined( $const ) ? trim( (string) constant( $const ) ) : '';
+	if ( '' === $client || '' === $slot ) {
+		return;
+	}
+	$format = 'left' === $position ? 'vertical' : 'auto';
+	?>
+	<aside class="ad-slot ad-<?php echo esc_attr( $position ); ?>" aria-label="<?php esc_attr_e( 'Advertisement', 'gypsy-tarot' ); ?>">
+		<ins class="adsbygoogle"
+			style="display:block"
+			data-ad-client="<?php echo esc_attr( $client ); ?>"
+			data-ad-slot="<?php echo esc_attr( $slot ); ?>"
+			data-ad-format="<?php echo esc_attr( $format ); ?>"
+			data-full-width-responsive="true"></ins>
+		<script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+	</aside>
+	<?php
+}

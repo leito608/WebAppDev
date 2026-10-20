@@ -98,6 +98,7 @@
 
 	const translations = {
 		en: {
+			visitors: "No. of visitors",
 			navReading: "Your reading", heroEyebrow: "A little guidance, when you need it",
 			heroLineOne: "Find your way,", heroLineTwo: "one card at a time.",
 			heroCopy: "Take a breath. Think about what’s on your mind, and we’ll turn to the cards together.",
@@ -143,6 +144,7 @@
 			reflection: "See what feels right for you, and leave the rest. The cards can offer a fresh perspective, but you know your life best."
 		},
 		th: {
+			visitors: "จำนวนผู้เข้าชม",
 			navReading: "คำทำนายของคุณ", heroEyebrow: "ถ้ากำลังหาคำแนะนำ ลองเริ่มจากตรงนี้",
 			heroLineOne: "ค่อย ๆ ค้นพบทาง", heroLineTwo: "ทีละใบกับไพ่ทาโรต์",
 			heroCopy: "พักใจสักครู่ ลองนึกถึงเรื่องที่กำลังคิด แล้วมาเปิดไพ่ไปด้วยกัน",
@@ -635,11 +637,10 @@
 		try {
 			const response = await fetch(window.gypsyTarotConfig.restUrl, {
 				method: "POST",
-				credentials: "same-origin",
+				credentials: "omit",
 				signal: abortController.signal,
 				headers: {
-					"Content-Type": "application/json",
-					"X-WP-Nonce": window.gypsyTarotConfig.restNonce
+					"Content-Type": "application/json"
 				},
 				body: JSON.stringify(clientRequest)
 			});
@@ -769,4 +770,40 @@
 	});
 
 	setLanguage(language);
+
+	(function loadVisitorCount() {
+		const countElement = document.getElementById("visitor-count");
+		const counted = (function () {
+			try { return window.localStorage.getItem("gypsyVisitorCounted") === "1"; } catch (error) { return false; }
+		}());
+		const configRef = window.gypsyTarotConfig;
+		function show(data) {
+			if (!data || typeof data.count !== "number") { throw new Error("Visitor counter bad response"); }
+			countElement.textContent = data.count.toLocaleString();
+			try { window.localStorage.setItem("gypsyVisitorCounted", "1"); } catch (error) {}
+		}
+		function viaRest() {
+			const base = configRef.visitorsUrl;
+			const url = base + (base.indexOf("?") === -1 ? "?" : "&") + "t=" + Date.now();
+			return fetch(url, { method: counted ? "GET" : "POST", credentials: "omit", cache: "no-store" }).then(function (response) {
+				if (!response.ok) { throw new Error("Visitor counter HTTP " + response.status); }
+				return response.json();
+			});
+		}
+		function viaAjax() {
+			return fetch(configRef.ajaxUrl, {
+				method: "POST",
+				headers: { "Content-Type": "application/x-www-form-urlencoded" },
+				body: "action=gypsy_tarot_visitors&increment=" + (counted ? "0" : "1"),
+				cache: "no-store"
+			}).then(function (response) {
+				if (!response.ok) { throw new Error("Visitor counter ajax HTTP " + response.status); }
+				return response.json();
+			});
+		}
+		viaRest().catch(function (error) {
+			console.warn(error);
+			return viaAjax();
+		}).then(show).catch(function (error) { console.warn(error); });
+	}());
 }());

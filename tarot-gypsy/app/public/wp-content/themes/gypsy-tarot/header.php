@@ -14,6 +14,7 @@
 		<span class="brand-name"><?php bloginfo( 'name' ); ?></span>
 	</a>
 	<div class="header-tools">
+		<span class="visitor-counter"><span data-i18n="visitors">No. of visitors</span>: <strong id="visitor-count"><?php echo esc_html( number_format_i18n( gypsy_tarot_visitor_count() ) ); ?></strong></span>
 		<a class="nav-link" href="#reading" data-i18n="navReading">Your reading</a>
 		<button class="language-switch" type="button" id="language-toggle" aria-label="Switch language">ภาษาไทย</button>
 	</div>
