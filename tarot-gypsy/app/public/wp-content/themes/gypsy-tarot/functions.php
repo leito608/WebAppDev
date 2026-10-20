@@ -15,6 +15,48 @@ function gypsy_tarot_setup() {
 }
 add_action( 'after_setup_theme', 'gypsy_tarot_setup' );
 
+function gypsy_tarot_document_title( $title ) {
+	return is_front_page() ? 'มีเรื่องอะไรในใจ มาเปิดไพ่คุยกัน' : $title;
+}
+add_filter( 'pre_get_document_title', 'gypsy_tarot_document_title' );
+
+function gypsy_tarot_seo_head() {
+	if ( ! is_front_page() ) {
+		return;
+	}
+	$title       = 'มีเรื่องอะไรในใจ มาเปิดไพ่คุยกัน';
+	$description = 'เปิดไพ่ทาโรต์ออนไลน์ฟรี 3 ใบ อดีต ปัจจุบัน อนาคต ถามเรื่องความรัก การงาน การเงิน พร้อมคำทำนายจาก AI ไม่ต้องสมัครสมาชิก — Free online 3-card tarot reading for love, career and money.';
+	$url         = home_url( '/' );
+	$image       = get_theme_file_uri( '/assets/cards/major-00.jpeg' );
+	$schema      = array(
+		'@context'   => 'https://schema.org',
+		'@type'      => 'WebSite',
+		'name'       => $title,
+		'url'        => $url,
+		'inLanguage' => array( 'th', 'en' ),
+		'description' => $description,
+	);
+	?>
+	<meta name="description" content="<?php echo esc_attr( $description ); ?>">
+	<meta name="keywords" content="ดูดวงไพ่ทาโรต์, เปิดไพ่ยิปซี, ไพ่ทาโรต์ออนไลน์, ดูดวงความรัก, ดูดวงการงาน, tarot reading, free tarot">
+	<meta name="robots" content="index,follow,max-image-preview:large">
+	<link rel="canonical" href="<?php echo esc_url( $url ); ?>">
+	<meta property="og:type" content="website">
+	<meta property="og:site_name" content="<?php echo esc_attr( $title ); ?>">
+	<meta property="og:title" content="<?php echo esc_attr( $title ); ?>">
+	<meta property="og:description" content="<?php echo esc_attr( $description ); ?>">
+	<meta property="og:url" content="<?php echo esc_url( $url ); ?>">
+	<meta property="og:image" content="<?php echo esc_url( $image ); ?>">
+	<meta property="og:locale" content="th_TH">
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:title" content="<?php echo esc_attr( $title ); ?>">
+	<meta name="twitter:description" content="<?php echo esc_attr( $description ); ?>">
+	<meta name="twitter:image" content="<?php echo esc_url( $image ); ?>">
+	<script type="application/ld+json"><?php echo wp_json_encode( $schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ); ?></script>
+	<?php
+}
+add_action( 'wp_head', 'gypsy_tarot_seo_head', 1 );
+
 function gypsy_tarot_is_local_debug() {
 	if ( ! function_exists( 'wp_get_environment_type' ) || 'local' !== wp_get_environment_type() ) {
 		return false;
@@ -557,9 +599,9 @@ function gypsy_tarot_enqueue_assets() {
 		'gypsyTarotConfig',
 		array(
 			'cardBaseUrl' => trailingslashit( get_theme_file_uri( '/assets/cards/' ) ),
-			'restUrl'     => gypsy_tarot_relative_rest_url( '/gypsy-tarot/v1/reading' ),
+			'restUrl'     => defined( 'GYPSY_TAROT_API_BASE' ) ? untrailingslashit( GYPSY_TAROT_API_BASE ) . '/reading' : gypsy_tarot_relative_rest_url( '/gypsy-tarot/v1/reading' ),
 			'ajaxUrl'     => wp_make_link_relative( admin_url( 'admin-ajax.php' ) ),
-			'visitorsUrl' => gypsy_tarot_relative_rest_url( '/gypsy-tarot/v1/visitors' ),
+			'visitorsUrl' => defined( 'GYPSY_TAROT_API_BASE' ) ? untrailingslashit( GYPSY_TAROT_API_BASE ) . '/visitors' : gypsy_tarot_relative_rest_url( '/gypsy-tarot/v1/visitors' ),
 			'debugEnabled' => gypsy_tarot_is_local_debug(),
 			'groqEndpoint' => gypsy_tarot_is_local_debug() ? 'https://api.groq.com/openai/v1/chat/completions' : '',
 		)
