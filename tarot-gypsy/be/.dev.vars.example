@@ -1,1 +1,4 @@
 GROQ_API_KEY=your_groq_api_key
+GEMINI_API_KEY=GROQ_API_KEY=your_api_key
+# Local only: allow the local WordPress site to call the worker (overrides wrangler.toml)
+ALLOWED_ORIGINS=http://tarot-gypsy.local

@@ -15,12 +15,69 @@ function gypsy_tarot_setup() {
 }
 add_action( 'after_setup_theme', 'gypsy_tarot_setup' );
 
+function gypsy_tarot_is_dream_teller() {
+	return (bool) get_query_var( 'gypsy_tarot_dream_teller' );
+}
+
 function gypsy_tarot_document_title( $title ) {
+	if ( gypsy_tarot_is_dream_teller() ) {
+		return 'ทำนายฝัน — ห้องแห่งคำพยากรณ์';
+	}
+
 	return is_front_page() ? 'มีเรื่องอะไรในใจ มาเปิดไพ่คุยกัน' : $title;
 }
 add_filter( 'pre_get_document_title', 'gypsy_tarot_document_title' );
 
+function gypsy_tarot_register_dream_teller_route() {
+	add_rewrite_rule( '^dream-teller/?$', 'index.php?gypsy_tarot_dream_teller=1', 'top' );
+}
+add_action( 'init', 'gypsy_tarot_register_dream_teller_route' );
+
+function gypsy_tarot_dream_teller_query_var( $query_vars ) {
+	$query_vars[] = 'gypsy_tarot_dream_teller';
+	return $query_vars;
+}
+add_filter( 'query_vars', 'gypsy_tarot_dream_teller_query_var' );
+
+function gypsy_tarot_refresh_dream_teller_route() {
+	$route_version = '2';
+	$rules         = get_option( 'rewrite_rules' );
+	// Also flush when the stored rules lack our route (e.g. a database copied from another site).
+	$missing_rule  = is_array( $rules ) && ! isset( $rules['^dream-teller/?$'] );
+	if ( $missing_rule || get_option( 'gypsy_tarot_dream_route_version' ) !== $route_version ) {
+		flush_rewrite_rules( false );
+		update_option( 'gypsy_tarot_dream_route_version', $route_version );
+	}
+}
+add_action( 'init', 'gypsy_tarot_refresh_dream_teller_route', 20 );
+
+function gypsy_tarot_dream_teller_template( $template ) {
+	if ( gypsy_tarot_is_dream_teller() ) {
+		return get_theme_file_path( '/page-dream-teller.php' );
+	}
+
+	return $template;
+}
+add_filter( 'template_include', 'gypsy_tarot_dream_teller_template' );
+
 function gypsy_tarot_seo_head() {
+	if ( gypsy_tarot_is_dream_teller() ) {
+		$title       = 'ทำนายฝัน — ตีความความฝันของคุณ';
+		$description = 'ค้นหาความหมายของความฝันจากคลังคำทำนายภาษาไทย พร้อมมุมมองชวนทบทวนใจ ใช้งานฟรี ไม่ต้องสมัครสมาชิก';
+		$url         = home_url( '/dream-teller/' );
+		?>
+		<meta name="description" content="<?php echo esc_attr( $description ); ?>">
+		<meta name="robots" content="index,follow,max-image-preview:large">
+		<link rel="canonical" href="<?php echo esc_url( $url ); ?>">
+		<meta property="og:type" content="website">
+		<meta property="og:title" content="<?php echo esc_attr( $title ); ?>">
+		<meta property="og:description" content="<?php echo esc_attr( $description ); ?>">
+		<meta property="og:url" content="<?php echo esc_url( $url ); ?>">
+		<meta property="og:locale" content="th_TH">
+		<?php
+		return;
+	}
+
 	if ( ! is_front_page() ) {
 		return;
 	}
@@ -156,6 +213,132 @@ function gypsy_tarot_register_reading_endpoint() {
 	);
 }
 add_action( 'rest_api_init', 'gypsy_tarot_register_reading_endpoint' );
+
+function gypsy_tarot_gemini_api_key() {
+	$value = getenv( 'GEMINI_API_KEY' );
+	if ( ( false === $value || '' === $value ) && isset( $_SERVER['GEMINI_API_KEY'] ) ) {
+		$value = $_SERVER['GEMINI_API_KEY'];
+	}
+	if ( ( false === $value || '' === $value ) && defined( 'GYPSY_TAROT_GEMINI_API_KEY' ) ) {
+		$value = GYPSY_TAROT_GEMINI_API_KEY;
+	}
+	if ( ( false === $value || '' === $value ) ) {
+		$env_file = dirname( untrailingslashit( ABSPATH ) ) . '/.envrc';
+		$lines    = is_readable( $env_file ) ? file( $env_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES ) : array();
+		foreach ( is_array( $lines ) ? $lines : array() as $line ) {
+			if ( preg_match( '/^\s*export\s+GEMINI_API_KEY\s*=\s*(.*?)\s*$/', $line, $matches ) ) {
+				$value = trim( $matches[1], " \t\"'" );
+				break;
+			}
+		}
+	}
+
+	return is_string( $value ) ? trim( $value ) : '';
+}
+
+function gypsy_tarot_register_dream_endpoint() {
+	register_rest_route(
+		'gypsy-tarot/v1',
+		'/dream',
+		array(
+			'methods'             => WP_REST_Server::CREATABLE,
+			'callback'            => 'gypsy_tarot_interpret_dream',
+			'permission_callback' => '__return_true',
+		)
+	);
+}
+add_action( 'rest_api_init', 'gypsy_tarot_register_dream_endpoint' );
+
+function gypsy_tarot_interpret_dream( WP_REST_Request $request ) {
+	$dream    = $request->get_param( 'dream' );
+	$language = $request->get_param( 'language' );
+
+	if ( ! is_string( $dream ) || '' === trim( $dream ) || mb_strlen( $dream ) > 600 ) {
+		return new WP_Error( 'gypsy_tarot_invalid_dream', 'Describe your dream in 600 characters or fewer.', array( 'status' => 400 ) );
+	}
+	if ( ! is_string( $language ) || ! preg_match( '/^[a-z]{2}$/', $language ) ) {
+		return new WP_Error( 'gypsy_tarot_invalid_language', 'Invalid language.', array( 'status' => 400 ) );
+	}
+
+	$api_key = gypsy_tarot_gemini_api_key();
+	if ( '' === $api_key ) {
+		error_log( 'Gypsy Tarot dream teller unavailable: GEMINI_API_KEY is not configured.' );
+		return new WP_Error( 'gypsy_tarot_ai_unconfigured', 'AI dream teller is not configured.', array( 'status' => 503 ) );
+	}
+
+	$client_ip  = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : 'unknown';
+	$rate_key   = 'gypsy_tarot_dream_' . substr( wp_hash( $client_ip, 'nonce' ), 0, 32 );
+	$rate_count = (int) get_transient( $rate_key );
+	$rate_limit = (int) apply_filters( 'gypsy_tarot_dream_rate_limit', 'local' === wp_get_environment_type() ? 1000 : 10 );
+	if ( $rate_count >= $rate_limit ) {
+		return new WP_Error( 'gypsy_tarot_ai_rate_limited', 'Please wait a little before requesting another dream reading.', array( 'status' => 429 ) );
+	}
+	set_transient( $rate_key, $rate_count + 1, HOUR_IN_SECONDS );
+
+	$dream         = sanitize_textarea_field( $dream );
+	$models        = array( 'gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-2.5-flash', 'gemini-3.5-flash-lite', 'gemini-2.5-flash-lite' );
+	$system_prompt = "You are dream teller, translate the dream.\n"
+		. "Get the result from several online sources, match the best result across multiple sources, and explain the dream's meaning.\n"
+		. "Then provide three different suggested 3-digit lottery numbers and three different suggested 2-digit lottery numbers derived from the dream's symbols.\n"
+		. "Write plain paragraphs separated by blank lines; do not use markdown, tables, bullet lists or headings with symbols. Put the three 3-digit numbers and the three 2-digit numbers each in their own final paragraph (numbers separated by commas), labelled in the response language.\n"
+		. "Lottery numbers are for entertainment only; say clearly that they are not guaranteed. Respond entirely in language code: {$language}.";
+	$payload       = array(
+		'systemInstruction' => array( 'parts' => array( array( 'text' => $system_prompt ) ) ),
+		'contents'          => array( array( 'role' => 'user', 'parts' => array( array( 'text' => $dream ) ) ) ),
+		'tools'             => array( array( 'google_search' => new stdClass() ) ),
+		'generationConfig'  => array( 'temperature' => 0.5, 'maxOutputTokens' => 2000 ),
+	);
+
+	$max_attempts = max( 3, count( $models ) );
+	$model_index  = 0;
+	for ( $attempt = 1; $attempt <= $max_attempts; $attempt++ ) {
+		$model    = $models[ $model_index ];
+		$response = wp_remote_post(
+			'https://generativelanguage.googleapis.com/v1beta/models/' . rawurlencode( $model ) . ':generateContent',
+			array(
+				'timeout'     => 45,
+				'redirection' => 0,
+				'headers'     => array(
+					'Content-Type'   => 'application/json',
+					'x-goog-api-key' => $api_key,
+				),
+				'body'        => wp_json_encode( $payload ),
+			)
+		);
+
+		$status = 0;
+		if ( is_wp_error( $response ) ) {
+			error_log( 'Gypsy Tarot Gemini attempt ' . $attempt . ' (' . $model . ') failed: ' . $response->get_error_code() );
+		} else {
+			$status = (int) wp_remote_retrieve_response_code( $response );
+			$body   = json_decode( wp_remote_retrieve_body( $response ), true );
+			if ( 200 === $status && is_array( $body ) ) {
+				$text = '';
+				foreach ( isset( $body['candidates'][0]['content']['parts'] ) && is_array( $body['candidates'][0]['content']['parts'] ) ? $body['candidates'][0]['content']['parts'] : array() as $part ) {
+					if ( isset( $part['text'] ) && is_string( $part['text'] ) && empty( $part['thought'] ) ) {
+						$text .= $part['text'];
+					}
+				}
+				$text = trim( $text );
+				if ( mb_strlen( $text ) >= 40 ) {
+					return rest_ensure_response( array( 'reading' => $text, 'model' => $model ) );
+				}
+				error_log( 'Gypsy Tarot Gemini attempt ' . $attempt . ' (' . $model . ') returned an empty or too-short reading.' );
+			} else {
+				error_log( 'Gypsy Tarot Gemini attempt ' . $attempt . ' (' . $model . ') returned HTTP ' . $status . '.' );
+			}
+		}
+
+		// Rate or quota limit on the first model: move to the fallback model right away.
+		if ( 429 === $status && $model_index < count( $models ) - 1 ) {
+			$model_index++;
+		} elseif ( $attempt < $max_attempts ) {
+			usleep( 600000 * $attempt );
+		}
+	}
+
+	return new WP_Error( 'gypsy_tarot_ai_unavailable', 'AI dream teller is temporarily unavailable. Please try again soon.', array( 'status' => 502 ) );
+}
 
 function gypsy_tarot_visitor_count( $increment = false ) {
 	global $wpdb;
@@ -586,26 +769,43 @@ function gypsy_tarot_enqueue_assets() {
 		$theme->get( 'Version' )
 	);
 
-	wp_enqueue_script(
-		'gypsy-tarot-app',
-		get_theme_file_uri( '/assets/js/tarot.js' ),
-		array(),
-		$theme->get( 'Version' ),
-		true
-	);
+	if ( gypsy_tarot_is_dream_teller() ) {
+		wp_enqueue_script(
+			'gypsy-tarot-dream-teller',
+			get_theme_file_uri( '/assets/js/dream-teller.js' ),
+			array(),
+			$theme->get( 'Version' ),
+			true
+		);
+		wp_localize_script(
+			'gypsy-tarot-dream-teller',
+			'gypsyDreamConfig',
+			array(
+				'restUrl' => defined( 'GYPSY_TAROT_API_BASE' ) ? untrailingslashit( GYPSY_TAROT_API_BASE ) . '/dream' : gypsy_tarot_relative_rest_url( '/gypsy-tarot/v1/dream' ),
+			)
+		);
+	} elseif ( is_front_page() ) {
+		wp_enqueue_script(
+			'gypsy-tarot-app',
+			get_theme_file_uri( '/assets/js/tarot.js' ),
+			array(),
+			$theme->get( 'Version' ),
+			true
+		);
 
-	wp_localize_script(
-		'gypsy-tarot-app',
-		'gypsyTarotConfig',
-		array(
-			'cardBaseUrl' => trailingslashit( get_theme_file_uri( '/assets/cards/' ) ),
-			'restUrl'     => defined( 'GYPSY_TAROT_API_BASE' ) ? untrailingslashit( GYPSY_TAROT_API_BASE ) . '/reading' : gypsy_tarot_relative_rest_url( '/gypsy-tarot/v1/reading' ),
-			'ajaxUrl'     => wp_make_link_relative( admin_url( 'admin-ajax.php' ) ),
-			'visitorsUrl' => defined( 'GYPSY_TAROT_API_BASE' ) ? untrailingslashit( GYPSY_TAROT_API_BASE ) . '/visitors' : gypsy_tarot_relative_rest_url( '/gypsy-tarot/v1/visitors' ),
-			'debugEnabled' => gypsy_tarot_is_local_debug(),
-			'groqEndpoint' => gypsy_tarot_is_local_debug() ? 'https://api.groq.com/openai/v1/chat/completions' : '',
-		)
-	);
+		wp_localize_script(
+			'gypsy-tarot-app',
+			'gypsyTarotConfig',
+			array(
+				'cardBaseUrl'  => trailingslashit( get_theme_file_uri( '/assets/cards/' ) ),
+				'restUrl'      => defined( 'GYPSY_TAROT_API_BASE' ) ? untrailingslashit( GYPSY_TAROT_API_BASE ) . '/reading' : gypsy_tarot_relative_rest_url( '/gypsy-tarot/v1/reading' ),
+				'ajaxUrl'      => wp_make_link_relative( admin_url( 'admin-ajax.php' ) ),
+				'visitorsUrl'  => defined( 'GYPSY_TAROT_API_BASE' ) ? untrailingslashit( GYPSY_TAROT_API_BASE ) . '/visitors' : gypsy_tarot_relative_rest_url( '/gypsy-tarot/v1/visitors' ),
+				'debugEnabled' => gypsy_tarot_is_local_debug(),
+				'groqEndpoint' => gypsy_tarot_is_local_debug() ? 'https://api.groq.com/openai/v1/chat/completions' : '',
+			)
+		);
+	}
 }
 add_action( 'wp_enqueue_scripts', 'gypsy_tarot_enqueue_assets' );
 

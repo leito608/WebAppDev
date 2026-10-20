@@ -2,7 +2,7 @@
 Theme Name: Gypsy Tarot
 Author: Gypsy Tarot
 Description: A bilingual, mobile-friendly tarot reading experience for WordPress.
-Version: 1.4.7
+Version: 1.4.8
 Requires at least: 6.0
 Requires PHP: 7.2
 Text Domain: gypsy-tarot
@@ -274,6 +274,24 @@ a:focus-visible {
 	margin-top: 16px;
 }
 
+.dream-link {
+	color: #f3dfbd;
+	display: inline-block;
+	font-size: 14px;
+	margin: 20px 0 0 17px;
+	text-decoration-color: rgb(226 185 101 / 54%);
+	text-underline-offset: 5px;
+}
+
+.dream-link span {
+	color: var(--gold);
+	margin-left: 4px;
+}
+
+.dream-link:hover {
+	color: var(--gold);
+}
+
 .hero-art {
 	height: 450px;
 	position: absolute;
@@ -444,6 +462,307 @@ a:focus-visible {
 .reading-inner {
 	margin: 0 auto;
 	max-width: 1040px;
+}
+
+.dream-page {
+	background: #0a0712;
+	min-height: 100vh;
+	padding-top: 75px;
+}
+
+.dream-hero {
+	background:
+		radial-gradient(ellipse at 50% 0, rgb(80 24 132 / 25%), transparent 58%),
+		#0b0814;
+	border-bottom: 1px solid var(--line);
+	padding: 88px 24px 54px;
+	text-align: center;
+}
+
+.dream-hero .eyebrow {
+	margin-bottom: 12px;
+}
+
+.dream-hero h1 {
+	color: var(--white);
+	font-family: var(--serif);
+	font-size: clamp(42px, 7vw, 68px);
+	font-weight: 400;
+	margin: 0;
+}
+
+.dream-hero > p:last-child {
+	color: var(--muted);
+	font-size: 15px;
+	line-height: 1.8;
+	margin: 12px auto 0;
+	max-width: 610px;
+}
+
+.dream-lookup {
+	background:
+		radial-gradient(ellipse at 50% 8%, rgb(62 23 90 / 17%), transparent 41%),
+		#0a0712;
+	padding: 65px 24px 78px;
+}
+
+.dream-inner {
+	margin: 0 auto;
+	max-width: 900px;
+}
+
+.dream-inner .reading-heading {
+	margin-bottom: 27px;
+}
+
+.dream-inner .intro-copy {
+	font-size: 15px;
+}
+
+.dream-search {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin: 0 auto;
+	max-width: 720px;
+}
+
+.dream-search input {
+	flex: 1 1 100%;
+	background: rgb(255 255 255 / 4%);
+	border: 1px solid rgb(225 204 239 / 24%);
+	border-radius: 4px;
+	color: var(--ink);
+	font: inherit;
+	min-width: 0;
+	padding: 13px 15px;
+	width: 100%;
+}
+
+.dream-search input::placeholder {
+	color: #958aa1;
+	opacity: 1;
+}
+
+.dream-search input:focus-visible {
+	border-color: var(--gold);
+	outline: 2px solid rgb(226 185 101 / 30%);
+	outline-offset: 2px;
+}
+
+.dream-search .primary-button {
+	flex: 1 1 auto;
+	justify-content: center;
+}
+
+.dream-quick-search {
+	align-items: center;
+	color: var(--muted);
+	display: flex;
+	flex-wrap: wrap;
+	gap: 9px;
+	justify-content: center;
+	margin: 20px auto 0;
+}
+
+.dream-quick-search span {
+	font-size: 13px;
+	margin-right: 3px;
+}
+
+.dream-quick-search button {
+	background: rgb(255 255 255 / 2%);
+	border: 1px solid rgb(225 204 239 / 24%);
+	border-radius: 999px;
+	color: #e2d8eb;
+	cursor: pointer;
+	padding: 7px 14px;
+}
+
+.dream-quick-search button:hover,
+.dream-quick-search button:focus-visible {
+	border-color: var(--gold);
+	color: var(--gold);
+}
+
+.dream-ai-button:disabled {
+	cursor: wait;
+	opacity: .6;
+}
+
+.dream-ai-result {
+	background: linear-gradient(145deg, rgb(126 49 217 / 12%), rgb(255 255 255 / 2%));
+	border: 1px solid rgb(226 185 101 / 30%);
+	border-radius: 5px;
+	margin-top: 28px;
+	padding: 24px;
+}
+
+.dream-ai-title {
+	color: var(--gold);
+	font-family: var(--serif);
+	font-size: 22px;
+	font-weight: 400;
+	margin: 0 0 14px;
+}
+
+.dream-ai-result.is-loading {
+	text-align: center;
+}
+
+.dream-ai-loading {
+	align-items: center;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	padding: 22px 0 14px;
+}
+
+.dream-spinner {
+	align-items: center;
+	color: var(--gold);
+	display: flex;
+	font-size: 26px;
+	height: 76px;
+	justify-content: center;
+	position: relative;
+	width: 76px;
+}
+
+.dream-spinner::before,
+.dream-spinner::after {
+	border-radius: 50%;
+	content: "";
+	inset: 0;
+	position: absolute;
+}
+
+.dream-spinner::before {
+	border: 2px solid rgb(226 185 101 / 18%);
+}
+
+.dream-spinner::after {
+	animation: dream-spin 1.2s linear infinite;
+	border: 2px solid transparent;
+	border-top-color: var(--gold);
+	filter: drop-shadow(0 0 6px rgb(226 185 101 / 60%));
+}
+
+.dream-spinner span {
+	animation: dream-pulse 2.4s ease-in-out infinite;
+}
+
+.dream-ai-body .dream-loading-text {
+	color: rgb(253 250 255 / 78%);
+	font-size: 14px;
+	letter-spacing: .04em;
+	margin: 0;
+	max-width: 320px;
+}
+
+@keyframes dream-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes dream-pulse {
+	50% {
+		opacity: .45;
+		transform: scale(.9);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.dream-spinner::after {
+		animation-duration: 4s;
+	}
+
+	.dream-spinner span {
+		animation: none;
+	}
+}
+
+.dream-ai-body .dream-debug {
+	color: transparent;
+	font-size: 11px;
+	margin: 18px 0 0;
+	word-break: break-word;
+}
+
+.dream-ai-body p {
+	color: #e4dce9;
+	font-size: 15px;
+	line-height: 1.9;
+	margin: 0 0 14px;
+	white-space: pre-line;
+}
+
+.dream-ai-body p:last-child {
+	margin-bottom: 0;
+}
+
+.dream-results {
+	display: grid;
+	gap: 15px;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	margin-top: 35px;
+}
+
+.dream-results-title,
+.dream-results-count,
+.dream-empty {
+	color: var(--muted);
+	grid-column: 1 / -1;
+	margin: 0;
+	text-align: center;
+}
+
+.dream-results-title {
+	color: var(--gold);
+	font-size: 19px;
+	font-weight: 400;
+}
+
+.dream-card {
+	background: linear-gradient(145deg, rgb(255 255 255 / 4%), rgb(255 255 255 / 1%));
+	border: 1px solid var(--line);
+	border-radius: 5px;
+	padding: 22px;
+}
+
+.dream-card h3 {
+	color: var(--gold);
+	font-family: var(--serif);
+	font-size: 20px;
+	font-weight: 400;
+	margin: 0 0 10px;
+}
+
+.dream-card p {
+	font-size: 14px;
+	line-height: 1.8;
+	margin: 0;
+}
+
+.dream-card .dream-meaning {
+	color: #e4dce9;
+}
+
+.dream-card .dream-reflection {
+	border-top: 1px solid var(--line);
+	color: var(--muted);
+	margin-top: 15px;
+	padding-top: 13px;
+}
+
+.dream-disclaimer {
+	color: #978ca1;
+	font-size: 12px;
+	line-height: 1.7;
+	margin: 27px auto 0;
+	max-width: 720px;
+	text-align: center;
 }
 
 .reading-heading {
@@ -915,6 +1234,22 @@ a:focus-visible {
 	text-align: center;
 }
 
+.ai-status.is-loading {
+	align-items: center;
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+	letter-spacing: .04em;
+	padding: 10px 0;
+}
+
+.reading-note {
+	color: transparent;
+	font-size: 11px;
+	margin: 14px 0 0;
+	word-break: break-word;
+}
+
 .ai-debug {
 	background: rgb(5 4 10 / 76%);
 	border: 1px solid rgb(226 185 101 / 32%);
@@ -1096,11 +1431,16 @@ a:focus-visible {
 	}
 
 	.header-tools {
-		gap: 0;
+		gap: 12px;
 	}
 
 	.nav-link {
 		display: none;
+	}
+
+	.nav-link[data-i18n="navDream"] {
+		display: inline;
+		white-space: nowrap;
 	}
 
 	.hero {
@@ -1134,6 +1474,10 @@ a:focus-visible {
 		transform-origin: top right;
 	}
 
+	.dream-link {
+		margin-left: 0;
+	}
+
 	.hero-card {
 		left: 143px;
 	}
@@ -1148,6 +1492,49 @@ a:focus-visible {
 
 	.reading-section {
 		padding: 56px 19px 67px;
+	}
+
+	.dream-page {
+		padding-top: 64px;
+	}
+
+	.dream-hero {
+		padding: 76px 22px 40px;
+	}
+
+	.dream-hero > p:last-child {
+		font-size: 14px;
+	}
+
+	.dream-lookup {
+		padding: 48px 19px 58px;
+	}
+
+	.dream-search {
+		flex-direction: column;
+	}
+
+	.dream-search .primary-button {
+		justify-content: center;
+		width: 100%;
+	}
+
+	.dream-quick-search {
+		gap: 7px;
+	}
+
+	.dream-quick-search span {
+		flex-basis: 100%;
+		text-align: center;
+	}
+
+	.dream-results {
+		grid-template-columns: 1fr;
+		margin-top: 27px;
+	}
+
+	.dream-card {
+		padding: 18px;
 	}
 
 	.reading-heading {

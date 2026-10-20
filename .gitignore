@@ -1,2 +1,4 @@
 .DS_Store
 tarot-gypsy/app/.envrc
+tarot-gypsy/be/.dev.vars.example
+tarot-gypsy/be/.dev.vars.example

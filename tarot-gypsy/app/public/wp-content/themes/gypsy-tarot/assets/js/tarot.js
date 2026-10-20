@@ -99,7 +99,7 @@
 	const translations = {
 		en: {
 			visitors: "No. of visitors",
-			navReading: "Your reading", heroEyebrow: "A little guidance, when you need it",
+			navReading: "Your reading", navDream: "Dream teller", dreamLink: "Dream teller", heroEyebrow: "A little guidance, when you need it",
 			brandName: "Something on your mind? Let’s talk it over with the cards.", heroLineOne: "Something on your mind? Let’s talk it over with the cards.", heroLineTwo: "",
 			heroCopy: "Take a breath. Think about what’s on your mind, and we’ll turn to the cards together.",
 			startReading: "Let’s read the cards", heroNote: "A moment for yourself · No account needed",
@@ -130,10 +130,10 @@
 			stepThreeTitle: "Ready to see what your cards have to say?",
 			stepThreeCopy: "Your cards are waiting. Reveal them when you’re ready.",
 			getResult: "Reveal my reading",
-			aiWorking: "The cards are with the AI reader…",
-			aiPending: "Your cards are here. The AI is preparing your interpretation…",
-			aiComplete: "Your personal AI interpretation is ready.",
-			aiFallback: "The AI reader is unavailable right now, so here’s the built-in reading.",
+			aiWorking: "The cards are being read…",
+			aiPending: "Your cards are here. Preparing your interpretation…",
+			aiComplete: "",
+			aiFallback: "Here’s a reading to start with while the full interpretation is unavailable.",
 			aiDebugTitle: "Local AI debug details",
 			aiDebugPrivacy: "Contains the API endpoint, request prompt, response, and error details. Visible only on local development.",
 			upright: "Upright", reversed: "Reversed", orientation: "Card orientation",
@@ -145,7 +145,7 @@
 		},
 		th: {
 			visitors: "จำนวนผู้เข้าชม",
-			navReading: "คำทำนายของคุณ", heroEyebrow: "ถ้ากำลังหาคำแนะนำ ลองเริ่มจากตรงนี้",
+			navReading: "คำทำนายของคุณ", navDream: "ทำนายฝัน", dreamLink: "ทำนายฝัน", heroEyebrow: "ถ้ากำลังหาคำแนะนำ ลองเริ่มจากตรงนี้",
 			brandName: "มีเรื่องอะไรในใจ มาเปิดไพ่คุยกัน", heroLineOne: "มีเรื่องอะไรในใจ มาเปิดไพ่คุยกัน", heroLineTwo: "",
 			heroCopy: "พักใจสักครู่ ลองนึกถึงเรื่องที่กำลังคิด แล้วมาเปิดไพ่ไปด้วยกัน",
 			startReading: "มาเปิดไพ่กัน", heroNote: "ช่วงเวลาสำหรับคุณ · ไม่ต้องสมัครสมาชิก",
@@ -177,10 +177,10 @@
 			stepThreeTitle: "พร้อมดูหรือยังว่าไพ่ทั้งสามใบบอกอะไร?",
 			stepThreeCopy: "ไพ่ของคุณคว่ำรออยู่ กดเปิดได้เมื่อพร้อม",
 			getResult: "เปิดคำทำนาย",
-			aiWorking: "กำลังให้ AI ช่วยอ่านไพ่ของคุณ…",
+			aiWorking: "กำลังอ่านไพ่ของคุณ…",
 			aiPending: "ไพ่พร้อมแล้ว กำลังเรียบเรียงคำอ่านให้คุณ…",
-			aiComplete: "คำอ่านไพ่จาก AI พร้อมแล้ว",
-			aiFallback: "ตอนนี้ AI ยังอ่านไพ่ไม่ได้ ลองอ่านคำทำนายพื้นฐานแทนก่อนได้เลย",
+			aiComplete: "",
+			aiFallback: "ตอนนี้ยังอ่านไพ่แบบเต็มไม่ได้ ลองอ่านคำทำนายพื้นฐานนี้ไปก่อนได้เลย",
 			aiDebugTitle: "รายละเอียดสำหรับตรวจสอบ AI ในเครื่อง",
 			aiDebugPrivacy: "มี URL ของ API, prompt ที่ส่ง, คำตอบ และรายละเอียดข้อผิดพลาด แสดงเฉพาะตอนพัฒนาในเครื่อง",
 			upright: "ไพ่ตั้งตรง", reversed: "ไพ่กลับหัว", orientation: "ทิศทางของไพ่",
@@ -228,11 +228,14 @@
 	const languageButton = document.getElementById("language-toggle");
 	const cardBaseUrl = window.gypsyTarotConfig.cardBaseUrl;
 	const deck = cardData.slice();
-	let language = "th";
+	let language = (function () {
+		try { return window.localStorage.getItem("gypsyLanguage") === "en" ? "en" : "th"; } catch (error) { return "th"; }
+	}());
 	let topic = "general";
 	let drawnCards = [];
 	let aiReading = null;
 	let aiReadingState = "idle";
+	let aiNote = "";
 	let aiRequestId = 0;
 	let isShuffled = false;
 	let isAnimatingShuffle = false;
@@ -258,6 +261,7 @@
 	function setLanguage(nextLanguage) {
 		language = nextLanguage;
 		document.documentElement.lang = language === "th" ? "th" : "en";
+		try { window.localStorage.setItem("gypsyLanguage", language); } catch (error) {}
 		document.querySelectorAll("[data-i18n]").forEach(function (element) {
 			const key = element.getAttribute("data-i18n");
 			element.textContent = translate(key);
@@ -291,7 +295,21 @@
 			success: "aiComplete",
 			fallback: "aiFallback"
 		};
-		aiStatus.textContent = statusKeys[aiReadingState] ? translate(statusKeys[aiReadingState]) : "";
+		const message = statusKeys[aiReadingState] ? translate(statusKeys[aiReadingState]) : "";
+		aiStatus.classList.toggle("is-loading", aiReadingState === "loading");
+		if (aiReadingState === "loading") {
+			const spinner = document.createElement("span");
+			spinner.className = "dream-spinner";
+			spinner.setAttribute("aria-hidden", "true");
+			const icon = document.createElement("span");
+			icon.textContent = "☾";
+			spinner.appendChild(icon);
+			const text = document.createElement("span");
+			text.textContent = message;
+			aiStatus.replaceChildren(spinner, text);
+		} else {
+			aiStatus.textContent = message;
+		}
 	}
 
 	function renderAiDebug(debugData) {
@@ -506,6 +524,16 @@
 			readingReflection.textContent = aiReadingState === "loading" ? translate("aiPending") : builtInReading;
 		}
 		updateAiStatus();
+		const oldNote = result.querySelector(".reading-note");
+		if (oldNote) {
+			oldNote.remove();
+		}
+		if (aiNote && aiReadingState !== "loading") {
+			const note = document.createElement("p");
+			note.className = "reading-note";
+			note.textContent = aiNote;
+			readingReflection.insertAdjacentElement("afterend", note);
+		}
 	}
 
 	function appendInline(parent, text) {
@@ -607,6 +635,7 @@
 		cardPicker.hidden = true;
 		aiReading = null;
 		aiReadingState = "loading";
+		aiNote = "";
 		const requestId = ++aiRequestId;
 		if (aiDebug) {
 			aiDebug.hidden = true;
@@ -647,6 +676,9 @@
 			let data;
 			try {
 				data = await response.json();
+				if (data && data.note) {
+					aiNote = String(data.note);
+				}
 			} catch (error) {
 				renderAiDebug({
 					endpoint: window.gypsyTarotConfig.groqEndpoint,
@@ -705,12 +737,14 @@
 				renderAiDebug(data.debug);
 			}
 			aiReading = data.reading.trim();
+			aiNote = String(data.note || "");
 			aiReadingState = "success";
 		} catch (error) {
 			if (requestId !== aiRequestId) {
 				return;
 			}
 			aiReading = null;
+			aiNote = [aiNote, error && error.message].filter(Boolean).join(" — ");
 			if (window.gypsyTarotConfig.debugEnabled && aiDebug && aiDebug.hidden) {
 				renderAiDebug({
 					endpoint: window.gypsyTarotConfig.groqEndpoint,

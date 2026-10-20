@@ -93,6 +93,8 @@ if ( ! defined( 'WP_DEBUG' ) ) {
 }
 
 define( 'WP_ENVIRONMENT_TYPE', 'local' );
+// Local Cloudflare Worker (`npm run dev` in be/). Remove this line to use the built-in WordPress endpoints.
+define( 'GYPSY_TAROT_API_BASE', 'http://localhost:8787' );
 /* That's all, stop editing! Happy publishing. */
 
 /** Absolute path to the WordPress directory. */

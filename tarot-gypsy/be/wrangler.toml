@@ -6,6 +6,7 @@ compatibility_date = "2024-11-01"
 # Comma-separated list of allowed origins, or "*"
 ALLOWED_ORIGINS = "https://www.doomanman.com,https://doomanman.com"
 AI_RATE_LIMIT = "5"
+DREAM_RATE_LIMIT = "30"
 GROQ_LLM_MODEL1 = "openai/gpt-oss-120b"
 GROQ_LLM_MODEL2 = "openai/gpt-oss-20b"
 

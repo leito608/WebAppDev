@@ -32,8 +32,8 @@ function json(body, status, cors, extra = {}) {
 	});
 }
 
-function apiError(code, message, status, cors) {
-	return json({ code, message, data: { status } }, status, cors);
+function apiError(code, message, status, cors, debug) {
+	return json({ code, message, data: { status }, ...(debug ? { debug, note: debug } : {}) }, status, cors);
 }
 
 function cleanText(value) {
@@ -124,12 +124,14 @@ async function handleReading(request, env, cors) {
 		spread_name: "Three-card Past, Present, Future",
 	});
 
+	const trail = [];
 	const unavailable = () =>
 		apiError(
 			"gypsy_tarot_ai_unavailable",
 			"AI reading is temporarily unavailable. The built-in reading will be shown instead.",
 			502,
 			cors,
+			trail.join(" | "),
 		);
 
 	const TOKEN_LIMIT_HINTS = ["token limit", "maximum context", "context length", "context_length_exceeded", "too many tokens", "maximum number of tokens", "tokens exceed", "request too large"];
@@ -156,6 +158,7 @@ async function handleReading(request, env, cors) {
 					signal: AbortSignal.timeout(30000),
 				});
 			} catch (error) {
+				trail.push(`${model}: ${(error && error.message) || "request failed"}`);
 				console.error(`Groq request failed (${model}, attempt ${attempt}/${MAX_ATTEMPTS})`, error && error.message);
 				lastFailure = "transport";
 				if (attempt < MAX_ATTEMPTS) await sleep(500 * attempt);
@@ -172,15 +175,17 @@ async function handleReading(request, env, cors) {
 			if (response.ok && typeof content === "string") {
 				const reading = content.trim();
 				if (isDegenerate(reading)) {
+					trail.push(`${model}: degenerate output`);
 					console.error("Degenerate output from", model);
 					lastFailure = "degenerate";
 					break;
 				}
-				return json({ reading }, 200, cors);
+				return json({ reading, note: [...trail, `${model}: ok`].join(" | ") }, 200, cors);
 			}
 
 			const message = ((body && body.error && body.error.message) || "").toLowerCase();
 			const tokenLimit = response.status === 413 || TOKEN_LIMIT_HINTS.some((s) => message.includes(s));
+			trail.push(`${model}: HTTP ${response.status}${tokenLimit ? " (token limit)" : ""}`);
 			console.error(`Groq HTTP ${response.status} (${model}, attempt ${attempt}/${MAX_ATTEMPTS})`, tokenLimit ? "(token limit)" : "");
 			if (tokenLimit) {
 				lastFailure = "token_limit";
@@ -198,7 +203,141 @@ async function handleReading(request, env, cors) {
 		"The AI models could not process this reading. The built-in reading will be shown instead.",
 		502,
 		cors,
+		trail.join(" | "),
 	);
+}
+
+const GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
+const GEMINI_MODELS = ["gemini-3.8-flash", "gemini-3.6-flash", "gemini-2.5-flash", "gemini-3.5-flash-lite", "gemini-2.5-flash-lite"];
+
+async function handleDream(request, env, cors) {
+	let payload;
+	try {
+		payload = await request.json();
+	} catch {
+		return apiError("gypsy_tarot_invalid_json", "Invalid request body.", 400, cors);
+	}
+	const { dream, language } = payload || {};
+	if (typeof dream !== "string" || !cleanText(dream) || dream.length > 600) {
+		return apiError("gypsy_tarot_invalid_dream", "Describe your dream in 600 characters or fewer.", 400, cors);
+	}
+	if (typeof language !== "string" || !/^[a-z]{2}$/.test(language)) {
+		return apiError("gypsy_tarot_invalid_language", "Invalid language.", 400, cors);
+	}
+	const groqModels = [1, 2, 3, 4, 5, 6, 7].map((n) => env[`GROQ_LLM_MODEL${n}`]).filter(Boolean);
+	const groqReady = Boolean(env.GROQ_API_KEY) && groqModels.length > 0;
+	if (!env.GEMINI_API_KEY && !groqReady) {
+		return apiError("gypsy_tarot_ai_unconfigured", "AI dream teller is not configured.", 503, cors);
+	}
+
+	if (env.KV) {
+		const key = `dream-rate:${request.headers.get("CF-Connecting-IP") || "unknown"}`;
+		const count = parseInt((await env.KV.get(key)) || "0", 10);
+		if (count >= parseInt(env.DREAM_RATE_LIMIT || "10", 10)) {
+			return apiError("gypsy_tarot_ai_rate_limited", "Please wait a little before requesting another dream reading.", 429, cors);
+		}
+		await env.KV.put(key, String(count + 1), { expirationTtl: RATE_WINDOW_SECONDS });
+	}
+
+	const systemPrompt =
+		"You are dream teller, translate the dream.\n" +
+		"Get the result from several online sources, match the best result across multiple sources, and explain the dream's meaning.\n" +
+		"Then provide three different suggested 3-digit lottery numbers and three different suggested 2-digit lottery numbers derived from the dream's symbols.\n" +
+		"Write plain paragraphs separated by blank lines; do not use markdown, tables, bullet lists or headings with symbols. " +
+		"Put the three 3-digit numbers and the three 2-digit numbers each in their own final paragraph (numbers separated by commas), labelled in the response language.\n" +
+		"Lottery numbers are for entertainment only; say clearly that they are not guaranteed. " +
+		`Respond entirely in language code: ${language}.`;
+	const requestFor = (useSearch) =>
+		JSON.stringify({
+			systemInstruction: { parts: [{ text: systemPrompt }] },
+			contents: [{ role: "user", parts: [{ text: cleanText(dream) }] }],
+			...(useSearch ? { tools: [{ google_search: {} }] } : {}),
+			generationConfig: { temperature: 0.5, maxOutputTokens: 2000 },
+		});
+
+	const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+	const trail = [];
+	let modelIndex = 0;
+	// Allow one attempt per model so the lite model is reached if the others hit their limits.
+	const maxAttempts = Math.max(MAX_ATTEMPTS, GEMINI_MODELS.length);
+	// Search grounding has a separate quota; if it is rejected, continue without it.
+	let useSearch = env.GEMINI_USE_SEARCH !== "false";
+	for (let attempt = 1; attempt <= (env.GEMINI_API_KEY ? maxAttempts : 0); attempt++) {
+		const model = GEMINI_MODELS[modelIndex];
+		let status = 0;
+		try {
+			const response = await fetch(`${GEMINI_ENDPOINT}/${encodeURIComponent(model)}:generateContent`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json", "x-goog-api-key": env.GEMINI_API_KEY },
+				body: requestFor(useSearch),
+				signal: AbortSignal.timeout(45000),
+			});
+			status = response.status;
+			if (response.ok) {
+				const body = await response.json();
+				const parts = (body.candidates && body.candidates[0] && body.candidates[0].content && body.candidates[0].content.parts) || [];
+				const reading = parts
+					.filter((part) => typeof part.text === "string" && !part.thought)
+					.map((part) => part.text)
+					.join("")
+					.trim();
+				if (reading.length >= 40) return json({ reading, model, debug: [...trail, `${model}: ok`].join(" | ") }, 200, cors);
+				trail.push(`${model}: empty`);
+				console.error(`Gemini empty reading (${model}, attempt ${attempt}/${maxAttempts})`);
+			} else {
+				trail.push(`${model}: HTTP ${status}`);
+				const detail = (await response.text()).slice(0, 300);
+				console.error(`Gemini HTTP ${status} (${model}, search=${useSearch}, attempt ${attempt}/${maxAttempts}) ${detail}`);
+			}
+		} catch (error) {
+			trail.push(`${model}: ${(error && error.message) || "request failed"}`);
+			console.error(`Gemini request failed (${model}, attempt ${attempt}/${maxAttempts})`, error && error.message);
+		}
+
+		if (status === 429) {
+			useSearch = false;
+			if (modelIndex < GEMINI_MODELS.length - 1) modelIndex += 1;
+		}
+		else if (attempt < maxAttempts) await sleep(600 * attempt);
+	}
+
+	// Every Gemini model failed or hit its limit: fall back to Groq.
+	if (groqReady) {
+		for (const model of groqModels) {
+			try {
+				const response = await fetch(GROQ_ENDPOINT, {
+					method: "POST",
+					headers: { Authorization: "Bearer " + env.GROQ_API_KEY, "Content-Type": "application/json" },
+					body: JSON.stringify({
+						model,
+						temperature: 0.5,
+						max_tokens: 2000,
+						messages: [
+							{ role: "system", content: systemPrompt },
+							{ role: "user", content: cleanText(dream) },
+						],
+					}),
+					signal: AbortSignal.timeout(30000),
+				});
+				if (response.ok) {
+					const body = await response.json();
+					const content = body.choices && body.choices[0] && body.choices[0].message && body.choices[0].message.content;
+					const reading = typeof content === "string" ? content.trim() : "";
+					if (reading.length >= 40) return json({ reading, model, provider: "groq", debug: [...trail, `groq ${model}: ok`].join(" | ") }, 200, cors);
+					trail.push(`groq ${model}: empty`);
+					console.error(`Groq empty dream reading (${model})`);
+				} else {
+					trail.push(`groq ${model}: HTTP ${response.status}`);
+					console.error(`Groq HTTP ${response.status} (dream, ${model})`);
+				}
+			} catch (error) {
+				trail.push(`groq ${model}: ${(error && error.message) || "request failed"}`);
+				console.error(`Groq dream request failed (${model})`, error && error.message);
+			}
+		}
+	}
+
+	return apiError("gypsy_tarot_ai_unavailable", "AI dream teller is temporarily unavailable. Please try again soon.", 502, cors, trail.join(" | "));
 }
 
 async function handleVisitors(request, env, cors) {
@@ -220,10 +359,11 @@ export default {
 		const path = pathname.replace(/^\/(wp-json\/)?gypsy-tarot\/v1/, "").replace(/\/+$/, "") || "/";
 
 		if (path === "/reading" && request.method === "POST") return handleReading(request, env, cors);
+		if (path === "/dream" && request.method === "POST") return handleDream(request, env, cors);
 		if (path === "/visitors" && (request.method === "GET" || request.method === "POST")) {
 			return handleVisitors(request, env, cors);
 		}
-		if (path === "/reading" || path === "/visitors") return apiError("method_not_allowed", "Method not allowed.", 405, cors);
+		if (path === "/reading" || path === "/dream" || path === "/visitors") return apiError("method_not_allowed", "Method not allowed.", 405, cors);
 		return apiError("not_found", "Not found.", 404, cors);
 	},
 };

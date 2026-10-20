@@ -13,6 +13,7 @@ A no-account, bilingual tarot-reading experience built as an installable WordPre
 7. **As a visitor,** I want a complete reading with a reflective summary and a way to begin again so I can revisit the cards.
 8. **As a visitor,** I want to add my own question and receive an AI interpretation of my three cards so the reading speaks to what is on my mind.
 9. **As a visitor,** I want the built-in interpretation to remain available if AI is unavailable so I can still complete my reading.
+10. **As a visitor,** I want to describe a dream and receive an interpretation with 3- and 2-digit lottery numbers, in my chosen language (Thai/English).
 
 ## Install
 
@@ -20,6 +21,10 @@ A no-account, bilingual tarot-reading experience built as an installable WordPre
 2. Set this homepage as the site's static front page under **Settings → Reading** if the site does not already use the latest posts as its home page.
 3. Configure the Groq API key and model IDs on the server (see **AI configuration** below).
 4. Open the site and choose **Start your reading**. No payment setup or visitor account is needed.
+
+## Dream interpretation
+
+The `/dream-teller/` page lets visitors describe a dream and sends it to the Cloudflare Worker `/dream` route (Gemini). The page shares the Thai/English toggle with the home page via `localStorage` (`gypsyLanguage`). The interpretations are reflective and for entertainment; they do not predict guaranteed events or replace professional advice.
 
 ## AI configuration
 
