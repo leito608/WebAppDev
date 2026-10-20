@@ -100,7 +100,7 @@
 		en: {
 			visitors: "No. of visitors",
 			navReading: "Your reading", heroEyebrow: "A little guidance, when you need it",
-			heroLineOne: "Find your way,", heroLineTwo: "one card at a time.",
+			brandName: "Something on your mind? Let’s talk it over with the cards.", heroLineOne: "Something on your mind? Let’s talk it over with the cards.", heroLineTwo: "",
 			heroCopy: "Take a breath. Think about what’s on your mind, and we’ll turn to the cards together.",
 			startReading: "Let’s read the cards", heroNote: "A moment for yourself · No account needed",
 			introEyebrow: "A three-card reading", introTitle: "Let’s see what the cards have to say.",
@@ -146,7 +146,7 @@
 		th: {
 			visitors: "จำนวนผู้เข้าชม",
 			navReading: "คำทำนายของคุณ", heroEyebrow: "ถ้ากำลังหาคำแนะนำ ลองเริ่มจากตรงนี้",
-			heroLineOne: "ค่อย ๆ ค้นพบทาง", heroLineTwo: "ทีละใบกับไพ่ทาโรต์",
+			brandName: "มีเรื่องอะไรในใจ มาเปิดไพ่คุยกัน", heroLineOne: "มีเรื่องอะไรในใจ มาเปิดไพ่คุยกัน", heroLineTwo: "",
 			heroCopy: "พักใจสักครู่ ลองนึกถึงเรื่องที่กำลังคิด แล้วมาเปิดไพ่ไปด้วยกัน",
 			startReading: "มาเปิดไพ่กัน", heroNote: "ช่วงเวลาสำหรับคุณ · ไม่ต้องสมัครสมาชิก",
 			introEyebrow: "คำทำนายไพ่สามใบ", introTitle: "มาดูกันว่าไพ่อยากบอกอะไร",
@@ -633,7 +633,7 @@
 		const abortController = new AbortController();
 		const requestTimeout = window.setTimeout(function () {
 			abortController.abort();
-		}, 35000);
+		}, 100000);
 		try {
 			const response = await fetch(window.gypsyTarotConfig.restUrl, {
 				method: "POST",

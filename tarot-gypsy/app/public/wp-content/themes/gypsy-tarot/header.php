@@ -10,8 +10,8 @@
 <a class="sr-only" href="#main-content"><?php esc_html_e( 'Skip to content', 'gypsy-tarot' ); ?></a>
 <header class="site-header">
 	<a class="brand" href="<?php echo esc_url( home_url( '/' ) ); ?>" aria-label="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
-		<span class="brand-mark" aria-hidden="true">✳</span>
-		<span class="brand-name"><?php bloginfo( 'name' ); ?></span>
+		<span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" focusable="false"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" fill="currentColor"/></svg></span>
+		<span class="brand-name" data-i18n="brandName">มีเรื่องอะไรในใจ มาเปิดไพ่คุยกัน</span>
 	</a>
 	<div class="header-tools">
 		<span class="visitor-counter"><span data-i18n="visitors">No. of visitors</span>: <strong id="visitor-count"><?php echo esc_html( number_format_i18n( gypsy_tarot_visitor_count() ) ); ?></strong></span>

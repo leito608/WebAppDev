@@ -12,7 +12,7 @@ gypsy_tarot_render_ad( 'left' );
 	<section class="hero" aria-labelledby="hero-title">
 		<div class="hero-inner">
 			<p class="eyebrow" data-i18n="heroEyebrow">A little guidance, when you need it</p>
-			<h1 id="hero-title"><span data-i18n="heroLineOne">Find your way,</span><br><em data-i18n="heroLineTwo">one card at a time.</em></h1>
+			<h1 id="hero-title"><span data-i18n="heroLineOne">มีเรื่องอะไรในใจ มาเปิดไพ่คุยกัน</span></h1>
 			<p class="hero-copy" data-i18n="heroCopy">Take a breath. Think about what’s on your mind, and we’ll turn to the cards together.</p>
 			<a class="primary-button" href="#reading">
 				<span data-i18n="startReading">Let’s read the cards</span>
