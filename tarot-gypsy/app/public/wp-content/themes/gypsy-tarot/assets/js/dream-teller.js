@@ -146,4 +146,35 @@
 	});
 
 	setLanguage(language);
+
+	(function loadVisitorCount() {
+		const countElement = document.getElementById("visitor-count");
+		const config = window.gypsyDreamConfig;
+		const counted = (function () {
+			try { return window.localStorage.getItem("gypsyVisitorCounted") === "1"; } catch (error) { return false; }
+		}());
+		function viaRest() {
+			const url = config.visitorsUrl + (config.visitorsUrl.indexOf("?") === -1 ? "?" : "&") + "t=" + Date.now();
+			return fetch(url, { method: counted ? "GET" : "POST", credentials: "omit", cache: "no-store" }).then(function (response) {
+				if (!response.ok) { throw new Error("Visitor counter HTTP " + response.status); }
+				return response.json();
+			});
+		}
+		function viaAjax() {
+			return fetch(config.ajaxUrl, {
+				method: "POST",
+				headers: { "Content-Type": "application/x-www-form-urlencoded" },
+				body: "action=gypsy_tarot_visitors&increment=" + (counted ? "0" : "1"),
+				cache: "no-store"
+			}).then(function (response) {
+				if (!response.ok) { throw new Error("Visitor counter ajax HTTP " + response.status); }
+				return response.json();
+			});
+		}
+		viaRest().catch(function () { return viaAjax(); }).then(function (data) {
+			if (!data || typeof data.count !== "number") { throw new Error("Visitor counter bad response"); }
+			countElement.textContent = data.count.toLocaleString();
+			try { window.localStorage.setItem("gypsyVisitorCounted", "1"); } catch (error) {}
+		}).catch(function (error) { console.warn(error); });
+	}());
 }());

@@ -759,6 +759,14 @@ function gypsy_tarot_relative_rest_url( $route ) {
 	return $path . 'index.php?rest_route=' . $route;
 }
 
+/**
+ * Version an asset by its modified time so browsers fetch the new file after every change.
+ */
+function gypsy_tarot_asset_version( $relative_path ) {
+	$path = get_theme_file_path( $relative_path );
+	return file_exists( $path ) ? (string) filemtime( $path ) : wp_get_theme()->get( 'Version' );
+}
+
 function gypsy_tarot_enqueue_assets() {
 	$theme = wp_get_theme();
 
@@ -766,7 +774,7 @@ function gypsy_tarot_enqueue_assets() {
 		'gypsy-tarot-style',
 		get_stylesheet_uri(),
 		array(),
-		$theme->get( 'Version' )
+		gypsy_tarot_asset_version( '/style.css' )
 	);
 
 	if ( gypsy_tarot_is_dream_teller() ) {
@@ -774,14 +782,16 @@ function gypsy_tarot_enqueue_assets() {
 			'gypsy-tarot-dream-teller',
 			get_theme_file_uri( '/assets/js/dream-teller.js' ),
 			array(),
-			$theme->get( 'Version' ),
+			gypsy_tarot_asset_version( '/assets/js/dream-teller.js' ),
 			true
 		);
 		wp_localize_script(
 			'gypsy-tarot-dream-teller',
 			'gypsyDreamConfig',
 			array(
-				'restUrl' => defined( 'GYPSY_TAROT_API_BASE' ) ? untrailingslashit( GYPSY_TAROT_API_BASE ) . '/dream' : gypsy_tarot_relative_rest_url( '/gypsy-tarot/v1/dream' ),
+				'restUrl'     => defined( 'GYPSY_TAROT_API_BASE' ) ? untrailingslashit( GYPSY_TAROT_API_BASE ) . '/dream' : gypsy_tarot_relative_rest_url( '/gypsy-tarot/v1/dream' ),
+				'ajaxUrl'     => wp_make_link_relative( admin_url( 'admin-ajax.php' ) ),
+				'visitorsUrl' => defined( 'GYPSY_TAROT_API_BASE' ) ? untrailingslashit( GYPSY_TAROT_API_BASE ) . '/visitors' : gypsy_tarot_relative_rest_url( '/gypsy-tarot/v1/visitors' ),
 			)
 		);
 	} elseif ( is_front_page() ) {
@@ -789,7 +799,7 @@ function gypsy_tarot_enqueue_assets() {
 			'gypsy-tarot-app',
 			get_theme_file_uri( '/assets/js/tarot.js' ),
 			array(),
-			$theme->get( 'Version' ),
+			gypsy_tarot_asset_version( '/assets/js/tarot.js' ),
 			true
 		);
 
