@@ -14,9 +14,10 @@
 		<span class="brand-name" data-i18n="brandName">มีเรื่องอะไรในใจ มาเปิดไพ่คุยกัน</span>
 	</a>
 	<div class="header-tools">
-		<span class="visitor-counter"><span data-i18n="visitors"><?php echo esc_html( is_front_page() && ! gypsy_tarot_is_dream_teller() ? 'No. of visitors' : 'ผู้เข้าชม' ); ?></span>: <strong id="visitor-count"><?php echo esc_html( number_format_i18n( gypsy_tarot_visitor_count() ) ); ?></strong></span>
-		<a class="nav-link" href="<?php echo esc_url( is_front_page() && ! gypsy_tarot_is_dream_teller() ? '#reading' : home_url( '/#reading' ) ); ?>" data-i18n="navReading"><?php echo esc_html( is_front_page() && ! gypsy_tarot_is_dream_teller() ? 'Your reading' : 'อ่านไพ่ทาโรต์' ); ?></a>
+		<span class="visitor-counter"><span data-i18n="visitors"><?php echo esc_html( is_front_page() && ! gypsy_tarot_is_oracle_page() ? 'No. of visitors' : 'ผู้เข้าชม' ); ?></span>: <strong id="visitor-count"><?php echo esc_html( number_format_i18n( gypsy_tarot_visitor_count() ) ); ?></strong></span>
+		<a class="nav-link" href="<?php echo esc_url( is_front_page() && ! gypsy_tarot_is_oracle_page() ? '#reading' : home_url( '/#reading' ) ); ?>" data-i18n="navReading"><?php echo esc_html( is_front_page() && ! gypsy_tarot_is_oracle_page() ? 'Your reading' : 'อ่านไพ่ทาโรต์' ); ?></a>
 		<a class="nav-link" href="<?php echo esc_url( home_url( '/dream-teller/' ) ); ?>" data-i18n="navDream">ทำนายฝัน</a>
+		<a class="nav-link" href="<?php echo esc_url( home_url( '/palm-teller/' ) ); ?>" data-i18n="navPalm">ดูลายมือ</a>
 		<button class="language-switch" type="button" id="language-toggle" aria-label="Switch language">ภาษาไทย</button>
 	</div>
 </header>

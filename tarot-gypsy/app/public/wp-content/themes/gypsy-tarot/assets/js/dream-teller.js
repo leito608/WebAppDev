@@ -3,7 +3,7 @@
 
 	const translations = {
 		th: {
-			brandName: "มีเรื่องอะไรในใจ มาเปิดไพ่คุยกัน", visitors: "ผู้เข้าชม", navReading: "อ่านไพ่ทาโรต์", navDream: "ทำนายฝัน",
+			brandName: "มีเรื่องอะไรในใจ มาเปิดไพ่คุยกัน", visitors: "ผู้เข้าชม", navReading: "อ่านไพ่ทาโรต์", navDream: "ทำนายฝัน", navPalm: "ดูลายมือ",
 			footerBrand: "ห้องแห่งคำพยากรณ์",
 			disclaimer: "ลองอ่านไพ่เพื่อทบทวนตัวเอง คำทำนายไม่อาจแทนคำแนะนำจากผู้เชี่ยวชาญได้",
 			dreamTitle: "ทำนายฝัน",
@@ -18,7 +18,7 @@
 			error: "ตอนนี้ยังทำนายฝันไม่ได้ ลองใหม่อีกครั้งในอีกสักครู่"
 		},
 		en: {
-			brandName: "Something on your mind? Let’s talk it over with the cards.", visitors: "No. of visitors", navReading: "Tarot reading", navDream: "Dream teller",
+			brandName: "Something on your mind? Let’s talk it over with the cards.", visitors: "No. of visitors", navReading: "Tarot reading", navDream: "Dream teller", navPalm: "Palm teller",
 			footerBrand: "The Oracle Room",
 			disclaimer: "A reading is a moment for reflection, not a substitute for professional advice.",
 			dreamTitle: "Dream teller",

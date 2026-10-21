@@ -14,6 +14,7 @@ A no-account, bilingual tarot-reading experience built as an installable WordPre
 8. **As a visitor,** I want to add my own question and receive an AI interpretation of my three cards so the reading speaks to what is on my mind.
 9. **As a visitor,** I want the built-in interpretation to remain available if AI is unavailable so I can still complete my reading.
 10. **As a visitor,** I want to describe a dream and receive an interpretation with 3- and 2-digit lottery numbers, in my chosen language (Thai/English).
+11. **As a visitor,** I want to upload a photo of my palm and receive an AI palm reading in my chosen language (Thai/English).
 
 ## Install
 
@@ -25,6 +26,10 @@ A no-account, bilingual tarot-reading experience built as an installable WordPre
 ## Dream interpretation
 
 The `/dream-teller/` page lets visitors describe a dream and sends it to the Cloudflare Worker `/dream` route (Gemini). The page shares the Thai/English toggle with the home page via `localStorage` (`gypsyLanguage`). The interpretations are reflective and for entertainment; they do not predict guaranteed events or replace professional advice.
+
+## Palm reading
+
+The `/palm-teller/` page lets visitors optionally ask a question and upload a palm photo (JPEG, PNG, or WebP). The browser resizes the image client-side, then sends it to the Cloudflare Worker `/palm` route (Groq vision). The reading covers past, present, and future with age ranges and focuses on the visitor’s question. If `GYPSY_TAROT_API_BASE` is not set, the theme falls back to the WordPress REST route `/gypsy-tarot/v1/palm`, which also uses Groq vision. Configure `GROQ_API_KEY` and a vision-capable `GROQ_PALM_MODEL` (defaults to `qwen/qwen3.8-27b`). Readings are reflective and for entertainment only; they are not medical advice.
 
 ## AI configuration
 
@@ -41,6 +46,7 @@ define( 'GYPSY_TAROT_GROQ_API_KEY', 'your-server-side-api-key' );
 define( 'GYPSY_TAROT_GROQ_LLM_MODEL1', 'your-first-model-id' );
 define( 'GYPSY_TAROT_GROQ_LLM_MODEL2', 'your-second-model-id' );
 // Continue with GYPSY_TAROT_GROQ_LLM_MODEL3 through MODEL7 as needed.
+define( 'GYPSY_TAROT_GROQ_PALM_MODEL', 'qwen/qwen3.8-27b' );
 ```
 
 Use private configuration values; never add real keys to the theme, upload archive, or a public repository. The app tries model 1 first and advances only after a token/context-limit error. Other API failures use the built-in reading. Requests are limited to five per IP address per hour.

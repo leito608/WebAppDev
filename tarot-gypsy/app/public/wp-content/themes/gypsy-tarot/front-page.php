@@ -18,7 +18,10 @@ gypsy_tarot_render_ad( 'left' );
 				<span data-i18n="startReading">Let’s read the cards</span>
 				<span aria-hidden="true">↗</span>
 			</a>
-			<a class="dream-link" href="<?php echo esc_url( home_url( '/dream-teller/' ) ); ?>"><span data-i18n="dreamLink">ทำนายฝัน</span> <span aria-hidden="true">✧</span></a>
+			<div class="hero-links">
+				<a class="dream-link" href="<?php echo esc_url( home_url( '/dream-teller/' ) ); ?>"><span data-i18n="dreamLink">ทำนายฝัน</span> <span aria-hidden="true">✧</span></a>
+				<a class="dream-link" href="<?php echo esc_url( home_url( '/palm-teller/' ) ); ?>"><span data-i18n="palmLink">ดูลายมือ</span> <span aria-hidden="true">✧</span></a>
+			</div>
 			<p class="hero-note" data-i18n="heroNote">A moment for yourself · No account needed</p>
 		</div>
 		<div class="hero-art" aria-hidden="true">

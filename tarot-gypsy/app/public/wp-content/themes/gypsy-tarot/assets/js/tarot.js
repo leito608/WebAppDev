@@ -99,7 +99,7 @@
 	const translations = {
 		en: {
 			visitors: "No. of visitors",
-			navReading: "Your reading", navDream: "Dream teller", dreamLink: "Dream teller", heroEyebrow: "A little guidance, when you need it",
+			navReading: "Your reading", navDream: "Dream teller", navPalm: "Palm teller", dreamLink: "Dream teller", palmLink: "Palm teller", heroEyebrow: "A little guidance, when you need it",
 			brandName: "Something on your mind? Let’s talk it over with the cards.", heroLineOne: "Something on your mind? Let’s talk it over with the cards.", heroLineTwo: "",
 			heroCopy: "Take a breath. Think about what’s on your mind, and we’ll turn to the cards together.",
 			startReading: "Let’s read the cards", heroNote: "A moment for yourself · No account needed",
@@ -145,7 +145,7 @@
 		},
 		th: {
 			visitors: "จำนวนผู้เข้าชม",
-			navReading: "คำทำนายของคุณ", navDream: "ทำนายฝัน", dreamLink: "ทำนายฝัน", heroEyebrow: "ถ้ากำลังหาคำแนะนำ ลองเริ่มจากตรงนี้",
+			navReading: "คำทำนายของคุณ", navDream: "ทำนายฝัน", navPalm: "ดูลายมือ", dreamLink: "ทำนายฝัน", palmLink: "ดูลายมือ", heroEyebrow: "ถ้ากำลังหาคำแนะนำ ลองเริ่มจากตรงนี้",
 			brandName: "มีเรื่องอะไรในใจ มาเปิดไพ่คุยกัน", heroLineOne: "มีเรื่องอะไรในใจ มาเปิดไพ่คุยกัน", heroLineTwo: "",
 			heroCopy: "พักใจสักครู่ ลองนึกถึงเรื่องที่กำลังคิด แล้วมาเปิดไพ่ไปด้วยกัน",
 			startReading: "มาเปิดไพ่กัน", heroNote: "ช่วงเวลาสำหรับคุณ · ไม่ต้องสมัครสมาชิก",

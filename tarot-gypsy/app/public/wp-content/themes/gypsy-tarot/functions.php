@@ -19,31 +19,44 @@ function gypsy_tarot_is_dream_teller() {
 	return (bool) get_query_var( 'gypsy_tarot_dream_teller' );
 }
 
+function gypsy_tarot_is_palm_teller() {
+	return (bool) get_query_var( 'gypsy_tarot_palm_teller' );
+}
+
+function gypsy_tarot_is_oracle_page() {
+	return gypsy_tarot_is_dream_teller() || gypsy_tarot_is_palm_teller();
+}
+
 function gypsy_tarot_document_title( $title ) {
 	if ( gypsy_tarot_is_dream_teller() ) {
-		return 'ทำนายฝัน — ห้องแห่งคำพยากรณ์';
+		return 'ดูดวงแม่นๆ — ทำนายฝัน';
+	}
+	if ( gypsy_tarot_is_palm_teller() ) {
+		return 'ดูดวงแม่นๆ — ดูลายมือ';
 	}
 
-	return is_front_page() ? 'มีเรื่องอะไรในใจ มาเปิดไพ่คุยกัน' : $title;
+	return is_front_page() ? 'ดูดวงแม่นๆ' : $title;
 }
 add_filter( 'pre_get_document_title', 'gypsy_tarot_document_title' );
 
 function gypsy_tarot_register_dream_teller_route() {
 	add_rewrite_rule( '^dream-teller/?$', 'index.php?gypsy_tarot_dream_teller=1', 'top' );
+	add_rewrite_rule( '^palm-teller/?$', 'index.php?gypsy_tarot_palm_teller=1', 'top' );
 }
 add_action( 'init', 'gypsy_tarot_register_dream_teller_route' );
 
 function gypsy_tarot_dream_teller_query_var( $query_vars ) {
 	$query_vars[] = 'gypsy_tarot_dream_teller';
+	$query_vars[] = 'gypsy_tarot_palm_teller';
 	return $query_vars;
 }
 add_filter( 'query_vars', 'gypsy_tarot_dream_teller_query_var' );
 
 function gypsy_tarot_refresh_dream_teller_route() {
-	$route_version = '2';
+	$route_version = '3';
 	$rules         = get_option( 'rewrite_rules' );
 	// Also flush when the stored rules lack our route (e.g. a database copied from another site).
-	$missing_rule  = is_array( $rules ) && ! isset( $rules['^dream-teller/?$'] );
+	$missing_rule  = is_array( $rules ) && ( ! isset( $rules['^dream-teller/?$'] ) || ! isset( $rules['^palm-teller/?$'] ) );
 	if ( $missing_rule || get_option( 'gypsy_tarot_dream_route_version' ) !== $route_version ) {
 		flush_rewrite_rules( false );
 		update_option( 'gypsy_tarot_dream_route_version', $route_version );
@@ -55,18 +68,49 @@ function gypsy_tarot_dream_teller_template( $template ) {
 	if ( gypsy_tarot_is_dream_teller() ) {
 		return get_theme_file_path( '/page-dream-teller.php' );
 	}
+	if ( gypsy_tarot_is_palm_teller() ) {
+		return get_theme_file_path( '/page-palm-teller.php' );
+	}
 
 	return $template;
 }
 add_filter( 'template_include', 'gypsy_tarot_dream_teller_template' );
 
+function gypsy_tarot_site_icon() {
+	$svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect width="24" height="24" rx="6" fill="#080611"/><path transform="translate(3 3) scale(.75)" d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" fill="#e2b965"/></svg>';
+	?>
+	<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<?php echo esc_attr( rawurlencode( $svg ) ); ?>">
+	<?php
+}
+add_action( 'wp_head', 'gypsy_tarot_site_icon', 1 );
+remove_action( 'wp_head', 'wp_site_icon', 99 );
+
 function gypsy_tarot_seo_head() {
 	if ( gypsy_tarot_is_dream_teller() ) {
-		$title       = 'ทำนายฝัน — ตีความความฝันของคุณ';
-		$description = 'ค้นหาความหมายของความฝันจากคลังคำทำนายภาษาไทย พร้อมมุมมองชวนทบทวนใจ ใช้งานฟรี ไม่ต้องสมัครสมาชิก';
+		$title       = 'ดูดวงแม่นๆ — ทำนายฝัน';
+		$description = 'ค้นหาความหมายของความฝันจากคลังคำทำนายภาษาไทย พร้อมมุมมองชวนทบทวนใจ ใช้งานฟรี ไม่ต้องสมัครสมาชิก ดูดวงแม่นๆ ดูดวง ดูไพ่ ดูลายมือ';
 		$url         = home_url( '/dream-teller/' );
 		?>
 		<meta name="description" content="<?php echo esc_attr( $description ); ?>">
+		<meta name="keywords" content="ทำนายฝัน, ตีความความฝัน, ดูดวงแม่นๆ, ดูดวงแม่นแม่น, ดูดวง, ดูไพ่, ทำนายฝัน, ดูลายมือ">
+		<meta name="robots" content="index,follow,max-image-preview:large">
+		<link rel="canonical" href="<?php echo esc_url( $url ); ?>">
+		<meta property="og:type" content="website">
+		<meta property="og:title" content="<?php echo esc_attr( $title ); ?>">
+		<meta property="og:description" content="<?php echo esc_attr( $description ); ?>">
+		<meta property="og:url" content="<?php echo esc_url( $url ); ?>">
+		<meta property="og:locale" content="th_TH">
+		<?php
+		return;
+	}
+
+	if ( gypsy_tarot_is_palm_teller() ) {
+		$title       = 'ดูดวงแม่นๆ — ดูลายมือ';
+		$description = 'อัปโหลดรูปฝ่ามือ ดูลายมือ ดูดวงแม่นๆ รับคำทำนายลายมือด้วย AI ฟรี ไม่ต้องสมัครสมาชิก — Upload a palm photo for a free AI palm reading.';
+		$url         = home_url( '/palm-teller/' );
+		?>
+		<meta name="description" content="<?php echo esc_attr( $description ); ?>">
+		<meta name="keywords" content="ดูลายมือ, อ่านลายมือ, ทำนายลายมือ, ดูดวงแม่นๆ, ดูดวงแม่นแม่น, ดูดวง, ดูไพ่, ทำนายฝัน, ดูลายมือ">
 		<meta name="robots" content="index,follow,max-image-preview:large">
 		<link rel="canonical" href="<?php echo esc_url( $url ); ?>">
 		<meta property="og:type" content="website">
@@ -81,8 +125,8 @@ function gypsy_tarot_seo_head() {
 	if ( ! is_front_page() ) {
 		return;
 	}
-	$title       = 'มีเรื่องอะไรในใจ มาเปิดไพ่คุยกัน';
-	$description = 'เปิดไพ่ทาโรต์ออนไลน์ฟรี 3 ใบ อดีต ปัจจุบัน อนาคต ถามเรื่องความรัก การงาน การเงิน พร้อมคำทำนายจาก AI ไม่ต้องสมัครสมาชิก — Free online 3-card tarot reading for love, career and money.';
+	$title       = 'ดูดวงแม่นๆ';
+	$description = 'ดูดวงแม่นๆ ดูไพ่ ทำนายฝัน ดูลายมือ เปิดไพ่ทาโรต์ออนไลน์ฟรี 3 ใบ อดีต ปัจจุบัน อนาคต ถามเรื่องความรัก การงาน การเงิน พร้อมคำทำนายจาก AI ไม่ต้องสมัครสมาชิก — Free online 3-card tarot reading for love, career and money.';
 	$url         = home_url( '/' );
 	$image       = get_theme_file_uri( '/assets/cards/major-00.jpeg' );
 	$schema      = array(
@@ -95,7 +139,7 @@ function gypsy_tarot_seo_head() {
 	);
 	?>
 	<meta name="description" content="<?php echo esc_attr( $description ); ?>">
-	<meta name="keywords" content="ดูดวงไพ่ทาโรต์, เปิดไพ่ยิปซี, ไพ่ทาโรต์ออนไลน์, ดูดวงความรัก, ดูดวงการงาน, tarot reading, free tarot">
+	<meta name="keywords" content="ดูดวงแม่นๆ, ดูดวงแม่นแม่น, ดูดวง, ดูไพ่, ทำนายฝัน, ดูลายมือ, ดูดวงไพ่ทาโรต์, เปิดไพ่ยิปซี, ไพ่ทาโรต์ออนไลน์, ดูดวงความรัก, ดูดวงการงาน, tarot reading, free tarot">
 	<meta name="robots" content="index,follow,max-image-preview:large">
 	<link rel="canonical" href="<?php echo esc_url( $url ); ?>">
 	<meta property="og:type" content="website">
@@ -160,6 +204,7 @@ function gypsy_tarot_groq_settings() {
 		'GROQ_LLM_MODEL5' => 'GYPSY_TAROT_GROQ_LLM_MODEL5',
 		'GROQ_LLM_MODEL6' => 'GYPSY_TAROT_GROQ_LLM_MODEL6',
 		'GROQ_LLM_MODEL7' => 'GYPSY_TAROT_GROQ_LLM_MODEL7',
+		'GROQ_PALM_MODEL' => 'GYPSY_TAROT_GROQ_PALM_MODEL',
 	);
 
 	foreach ( $constant_names as $environment_name => $constant_name ) {
@@ -181,7 +226,7 @@ function gypsy_tarot_groq_settings() {
 			$lines = file( $env_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
 			if ( is_array( $lines ) ) {
 				foreach ( $lines as $line ) {
-					if ( ! preg_match( '/^\s*export\s+(GROQ_API_KEY|GROQ_LLM_MODEL[1-7])\s*=\s*(.*?)\s*$/', $line, $matches ) ) {
+					if ( ! preg_match( '/^\s*export\s+(GROQ_API_KEY|GROQ_LLM_MODEL[1-7]|GROQ_PALM_MODEL)\s*=\s*(.*?)\s*$/', $line, $matches ) ) {
 						continue;
 					}
 
@@ -248,6 +293,186 @@ function gypsy_tarot_register_dream_endpoint() {
 	);
 }
 add_action( 'rest_api_init', 'gypsy_tarot_register_dream_endpoint' );
+
+function gypsy_tarot_register_palm_endpoint() {
+	register_rest_route(
+		'gypsy-tarot/v1',
+		'/palm',
+		array(
+			'methods'             => WP_REST_Server::CREATABLE,
+			'callback'            => 'gypsy_tarot_interpret_palm',
+			'permission_callback' => '__return_true',
+		)
+	);
+}
+add_action( 'rest_api_init', 'gypsy_tarot_register_palm_endpoint' );
+
+function gypsy_tarot_normalize_palm_image( $image, $mime_type ) {
+	if ( ! is_string( $image ) || '' === $image ) {
+		return null;
+	}
+
+	$data = trim( $image );
+	$mime = is_string( $mime_type ) ? strtolower( trim( $mime_type ) ) : '';
+	if ( preg_match( '#^data:(image/(?:jpeg|png|webp));base64,(.+)$#i', $data, $matches ) ) {
+		$mime = strtolower( $matches[1] );
+		$data = $matches[2];
+	}
+	$data = preg_replace( '/\s+/', '', $data );
+	$allowed = array( 'image/jpeg', 'image/png', 'image/webp' );
+	if ( ! in_array( $mime, $allowed, true ) || ! is_string( $data ) || '' === $data || strlen( $data ) > 2000000 ) {
+		return null;
+	}
+	if ( ! preg_match( '#^[A-Za-z0-9+/]+=*$#', $data ) ) {
+		return null;
+	}
+
+	return array(
+		'mimeType' => $mime,
+		'data'     => $data,
+	);
+}
+
+function gypsy_tarot_interpret_palm( WP_REST_Request $request ) {
+	$language = $request->get_param( 'language' );
+	$question = $request->get_param( 'question' );
+	$question = is_string( $question ) ? $question : '';
+	$image    = gypsy_tarot_normalize_palm_image( $request->get_param( 'image' ), $request->get_param( 'mimeType' ) );
+
+	if ( null === $image ) {
+		return new WP_Error( 'gypsy_tarot_invalid_palm_image', 'Upload a clear JPEG, PNG, or WebP photo of a palm (under about 1.5 MB).', array( 'status' => 400 ) );
+	}
+	if ( ! is_string( $language ) || ! in_array( $language, array( 'th', 'en' ), true ) ) {
+		return new WP_Error( 'gypsy_tarot_invalid_language', 'Choose Thai or English for the reading.', array( 'status' => 400 ) );
+	}
+	if ( mb_strlen( $question ) > 600 ) {
+		return new WP_Error( 'gypsy_tarot_invalid_question', 'The question must be 600 characters or fewer.', array( 'status' => 400 ) );
+	}
+
+	$groq_settings = gypsy_tarot_groq_settings();
+	$birth_date    = $request->get_param( 'birthDate' );
+	$birth_date    = is_string( $birth_date ) ? trim( $birth_date ) : '';
+	if ( '' !== $birth_date ) {
+		$birth_obj = DateTime::createFromFormat( '!Y-m-d', $birth_date );
+		if ( ! $birth_obj || $birth_obj->format( 'Y-m-d' ) !== $birth_date || $birth_obj > new DateTime( 'now' ) || (int) $birth_obj->format( 'Y' ) < 1900 ) {
+			return new WP_Error( 'gypsy_tarot_invalid_birth_date', 'Enter a valid date of birth.', array( 'status' => 400 ) );
+		}
+	}
+	$hand          = $request->get_param( 'hand' );
+	$hand          = is_string( $hand ) ? $hand : '';
+	if ( '' !== $hand && ! in_array( $hand, array( 'left', 'right' ), true ) ) {
+		return new WP_Error( 'gypsy_tarot_invalid_hand', 'Choose the left or right hand.', array( 'status' => 400 ) );
+	}
+	$api_key       = isset( $groq_settings['GROQ_API_KEY'] ) ? $groq_settings['GROQ_API_KEY'] : '';
+	if ( '' === $api_key ) {
+		error_log( 'Gypsy Tarot palm teller unavailable: GROQ_API_KEY is not configured.' );
+		return new WP_Error( 'gypsy_tarot_ai_unconfigured', 'AI palm teller is not configured.', array( 'status' => 503 ) );
+	}
+
+	$client_ip  = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : 'unknown';
+	$rate_key   = 'gypsy_tarot_palm_' . substr( wp_hash( $client_ip, 'nonce' ), 0, 32 );
+	$rate_count = (int) get_transient( $rate_key );
+	$rate_limit = (int) apply_filters( 'gypsy_tarot_palm_rate_limit', 'local' === wp_get_environment_type() ? 1000 : 10 );
+	if ( $rate_count >= $rate_limit ) {
+		return new WP_Error( 'gypsy_tarot_ai_rate_limited', 'Please wait a little before requesting another palm reading.', array( 'status' => 429 ) );
+	}
+	set_transient( $rate_key, $rate_count + 1, HOUR_IN_SECONDS );
+
+	$language_name = 'th' === $language ? 'Thai' : 'English';
+	$user_question = sanitize_textarea_field( $question );
+	$model         = isset( $groq_settings['GROQ_PALM_MODEL'] ) ? $groq_settings['GROQ_PALM_MODEL'] : 'qwen/qwen3.8-27b';
+	$today         = new DateTime( 'now', new DateTimeZone( 'UTC' ) );
+	$age           = null;
+	if ( '' !== $birth_date ) {
+		$age = (int) $today->diff( new DateTime( $birth_date, new DateTimeZone( 'UTC' ) ) )->y;
+	}
+	$system_prompt = "You are an expert, famous palm teller.\n"
+		. "Study the uploaded photo of a human palm. If the image is not a palm, or the palm lines are too unclear to read, say so briefly and ask for a clearer photo of an open palm with fingers together, well lit, filling the frame.\n"
+		. "Accuracy rules:\n"
+		. "- Describe only what is actually visible in the photo (line length, depth, curve, breaks, forks, islands, mounts, hand shape). If a line is faint or not visible, say it is unclear instead of inventing details.\n"
+		. "- The user prompt states which hand is shown (left or right). Mention it and, where relevant, note that classic palmistry reads the left hand as innate potential and the right hand as lived experience.\n"
+		. "- Today's date and the user's exact current age (when known) are given in the user prompt. Treat them as facts. Never guess, change, or contradict the age; never estimate age from the photo.\n"
+		. "- Divide the story into Past (ages before the current age), Present (the current age and the next year or two), and Future (older ages). Give every age range as concrete numbers consistent with the current age, and mention the matching calendar years when the birth year is known. Past ranges must end below the current age; Future ranges must start above it.\n"
+		. "- If no date of birth is given, do not state any specific age or year; use life stages instead (childhood, teens, young adulthood, midlife, later life) and briefly invite the user to add a date of birth for more precise timing.\n"
+		. "- Tie each claim to a specific palm feature, and link it to the user's question when one is provided. If no question is given, offer a general life reading.\n"
+		. "Use classic palmistry themes in plain language: heart line, head line, life line, fate line if visible, hand shape, and notable marks.\n"
+		. "Stay reflective and non-alarmist; never claim medical, legal, or guaranteed predictions. This is entertainment and reflection only.\n"
+		. "Write plain paragraphs separated by blank lines; do not use markdown, tables, bullet lists, or decorative heading symbols.\n"
+		. "Keep the reading under about 500 words and finish every thought.\n"
+		. "Respond entirely in {$language_name}. The supplied language code is {$language}.";
+	$birth_line    = "Today's date: " . $today->format( 'Y-m-d' ) . "\n";
+	if ( '' !== $hand ) {
+		$birth_line .= "Hand in the photo: {$hand} hand\n";
+	}
+	if ( '' !== $birth_date ) {
+		$birth_line .= "Date of birth (YYYY-MM-DD): {$birth_date}\nBirth year: " . substr( $birth_date, 0, 4 ) . "\nCurrent age: {$age} years old\n";
+	} else {
+		$birth_line .= "Date of birth: not provided\n";
+	}
+	$birth_line   .= "\n";
+	$user_text     = '' !== $user_question
+		? "{$birth_line}User question: {$user_question}\n\nPlease read this palm photo and tell the story of past, present, and future with age ranges, focused on my question."
+		: "{$birth_line}Please read this palm photo and tell the story of past, present, and future with age ranges.";
+	$payload       = array(
+		'model'       => $model,
+		'temperature' => 0.4,
+		'max_tokens'  => 2200,
+		'messages'    => array(
+			array( 'role' => 'system', 'content' => $system_prompt ),
+			array(
+				'role'    => 'user',
+				'content' => array(
+					array( 'type' => 'text', 'text' => $user_text ),
+					array(
+						'type'      => 'image_url',
+						'image_url' => array( 'url' => 'data:' . $image['mimeType'] . ';base64,' . $image['data'] ),
+					),
+				),
+			),
+		),
+	);
+
+	$max_attempts = 3;
+	for ( $attempt = 1; $attempt <= $max_attempts; $attempt++ ) {
+		$response = wp_remote_post(
+			'https://api.groq.com/openai/v1/chat/completions',
+			array(
+				'timeout'     => 60,
+				'redirection' => 0,
+				'headers'     => array(
+					'Content-Type'  => 'application/json',
+					'Authorization' => 'Bearer ' . $api_key,
+				),
+				'body'        => wp_json_encode( $payload ),
+			)
+		);
+
+		$status = 0;
+		if ( is_wp_error( $response ) ) {
+			error_log( 'Gypsy Tarot Groq palm attempt ' . $attempt . ' (' . $model . ') failed: ' . $response->get_error_code() );
+		} else {
+			$status = (int) wp_remote_retrieve_response_code( $response );
+			$body   = json_decode( wp_remote_retrieve_body( $response ), true );
+			if ( 200 === $status && is_array( $body ) ) {
+				$text = isset( $body['choices'][0]['message']['content'] ) && is_string( $body['choices'][0]['message']['content'] )
+					? trim( $body['choices'][0]['message']['content'] )
+					: '';
+				if ( mb_strlen( $text ) >= 40 ) {
+					return rest_ensure_response( array( 'reading' => $text, 'model' => $model, 'provider' => 'groq' ) );
+				}
+				error_log( 'Gypsy Tarot Groq palm attempt ' . $attempt . ' (' . $model . ') returned an empty or too-short reading.' );
+			} else {
+				error_log( 'Gypsy Tarot Groq palm attempt ' . $attempt . ' (' . $model . ') returned HTTP ' . $status . '.' );
+			}
+		}
+
+		if ( $attempt < $max_attempts ) {
+			usleep( 600000 * $attempt );
+		}
+	}
+
+	return new WP_Error( 'gypsy_tarot_ai_unavailable', 'AI palm teller is temporarily unavailable. Please try again soon.', array( 'status' => 502 ) );
+}
 
 function gypsy_tarot_interpret_dream( WP_REST_Request $request ) {
 	$dream    = $request->get_param( 'dream' );
@@ -790,6 +1015,23 @@ function gypsy_tarot_enqueue_assets() {
 			'gypsyDreamConfig',
 			array(
 				'restUrl'     => defined( 'GYPSY_TAROT_API_BASE' ) ? untrailingslashit( GYPSY_TAROT_API_BASE ) . '/dream' : gypsy_tarot_relative_rest_url( '/gypsy-tarot/v1/dream' ),
+				'ajaxUrl'     => wp_make_link_relative( admin_url( 'admin-ajax.php' ) ),
+				'visitorsUrl' => defined( 'GYPSY_TAROT_API_BASE' ) ? untrailingslashit( GYPSY_TAROT_API_BASE ) . '/visitors' : gypsy_tarot_relative_rest_url( '/gypsy-tarot/v1/visitors' ),
+			)
+		);
+	} elseif ( gypsy_tarot_is_palm_teller() ) {
+		wp_enqueue_script(
+			'gypsy-tarot-palm-teller',
+			get_theme_file_uri( '/assets/js/palm-teller.js' ),
+			array(),
+			gypsy_tarot_asset_version( '/assets/js/palm-teller.js' ),
+			true
+		);
+		wp_localize_script(
+			'gypsy-tarot-palm-teller',
+			'gypsyPalmConfig',
+			array(
+				'restUrl'     => defined( 'GYPSY_TAROT_API_BASE' ) ? untrailingslashit( GYPSY_TAROT_API_BASE ) . '/palm' : gypsy_tarot_relative_rest_url( '/gypsy-tarot/v1/palm' ),
 				'ajaxUrl'     => wp_make_link_relative( admin_url( 'admin-ajax.php' ) ),
 				'visitorsUrl' => defined( 'GYPSY_TAROT_API_BASE' ) ? untrailingslashit( GYPSY_TAROT_API_BASE ) . '/visitors' : gypsy_tarot_relative_rest_url( '/gypsy-tarot/v1/visitors' ),
 			)

@@ -340,6 +340,170 @@ async function handleDream(request, env, cors) {
 	return apiError("gypsy_tarot_ai_unavailable", "AI dream teller is temporarily unavailable. Please try again soon.", 502, cors, trail.join(" | "));
 }
 
+const PALM_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+const PALM_MAX_BASE64 = 2_000_000;
+
+function normalizeImagePayload(image, mimeType) {
+	if (typeof image !== "string" || !image) return null;
+	let data = image.trim();
+	let mime = typeof mimeType === "string" ? mimeType.trim().toLowerCase() : "";
+	const dataUrl = /^data:(image\/(?:jpeg|png|webp));base64,(.+)$/i.exec(data);
+	if (dataUrl) {
+		mime = dataUrl[1].toLowerCase();
+		data = dataUrl[2];
+	}
+	data = data.replace(/\s+/g, "");
+	if (!PALM_MIME_TYPES.has(mime) || !data || data.length > PALM_MAX_BASE64) return null;
+	if (!/^[A-Za-z0-9+/]+=*$/.test(data)) return null;
+	return { mimeType: mime, data };
+}
+
+async function handlePalm(request, env, cors) {
+	let payload;
+	try {
+		payload = await request.json();
+	} catch {
+		return apiError("gypsy_tarot_invalid_json", "Invalid request body.", 400, cors);
+	}
+	const { language } = payload || {};
+	const question = typeof (payload && payload.question) === "string" ? payload.question : "";
+	const image = normalizeImagePayload(payload && payload.image, payload && payload.mimeType);
+	if (!image) {
+		return apiError(
+			"gypsy_tarot_invalid_palm_image",
+			"Upload a clear JPEG, PNG, or WebP photo of a palm (under about 1.5 MB).",
+			400,
+			cors,
+		);
+	}
+	if (typeof language !== "string" || !["th", "en"].includes(language)) {
+		return apiError("gypsy_tarot_invalid_language", "Choose Thai or English for the reading.", 400, cors);
+	}
+	if (question.length > 600) {
+		return apiError("gypsy_tarot_invalid_question", "The question must be 600 characters or fewer.", 400, cors);
+	}
+	const birthDate = typeof (payload && payload.birthDate) === "string" ? payload.birthDate.trim() : "";
+	if (birthDate) {
+		const parsed = /^\d{4}-\d{2}-\d{2}$/.test(birthDate) ? new Date(`${birthDate}T00:00:00Z`) : null;
+		if (!parsed || Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== birthDate || parsed > new Date() || parsed.getUTCFullYear() < 1900) {
+			return apiError("gypsy_tarot_invalid_birth_date", "Enter a valid date of birth.", 400, cors);
+		}
+	}
+	const handValue = payload && payload.hand;
+	if (handValue !== undefined && handValue !== "" && handValue !== "left" && handValue !== "right") {
+		return apiError("gypsy_tarot_invalid_hand", "Choose the left or right hand.", 400, cors);
+	}
+	const hand = handValue === "left" || handValue === "right" ? handValue : "";
+	if (!env.GROQ_API_KEY) {
+		return apiError("gypsy_tarot_ai_unconfigured", "AI palm teller is not configured.", 503, cors);
+	}
+
+	if (env.KV) {
+		const key = `palm-rate:${request.headers.get("CF-Connecting-IP") || "unknown"}`;
+		const count = parseInt((await env.KV.get(key)) || "0", 10);
+		if (count >= parseInt(env.PALM_RATE_LIMIT || "10", 10)) {
+			return apiError("gypsy_tarot_ai_rate_limited", "Please wait a little before requesting another palm reading.", 429, cors);
+		}
+		await env.KV.put(key, String(count + 1), { expirationTtl: RATE_WINDOW_SECONDS });
+	}
+
+	const languageName = language === "th" ? "Thai" : "English";
+	const userQuestion = cleanText(question);
+	const today = new Date();
+	const todayIso = today.toISOString().slice(0, 10);
+	let age = null;
+	if (birthDate) {
+		const [by, bm, bd] = birthDate.split("-").map(Number);
+		age = today.getUTCFullYear() - by - (today.getUTCMonth() + 1 < bm || (today.getUTCMonth() + 1 === bm && today.getUTCDate() < bd) ? 1 : 0);
+	}
+	const systemPrompt =
+		"You are an expert, famous palm teller.\n" +
+		"Study the uploaded photo of a human palm. If the image is not a palm, or the palm lines are too unclear to read, say so briefly and ask for a clearer photo of an open palm with fingers together, well lit, filling the frame.\n" +
+		"Accuracy rules:\n" +
+		"- Describe only what is actually visible in the photo (line length, depth, curve, breaks, forks, islands, mounts, hand shape). If a line is faint or not visible, say it is unclear instead of inventing details.\n" +
+		"- The user prompt states which hand is shown (left or right). Mention it and, where relevant, note that classic palmistry reads the left hand as innate potential and the right hand as lived experience.\n" +
+		"- Today's date and the user's exact current age (when known) are given in the user prompt. Treat them as facts. Never guess, change, or contradict the age; never estimate age from the photo.\n" +
+		"- Divide the story into Past (ages before the current age), Present (the current age and the next year or two), and Future (older ages). Give every age range as concrete numbers consistent with the current age, and mention the matching calendar years when the birth year is known. Past ranges must end below the current age; Future ranges must start above it.\n" +
+		"- If no date of birth is given, do not state any specific age or year; use life stages instead (childhood, teens, young adulthood, midlife, later life) and briefly invite the user to add a date of birth for more precise timing.\n" +
+		"- Tie each claim to a specific palm feature, and link it to the user's question when one is provided. If no question is given, offer a general life reading.\n" +
+		"Use classic palmistry themes in plain language: heart line, head line, life line, fate line if visible, hand shape, and notable marks.\n" +
+		"Stay reflective and non-alarmist; never claim medical, legal, or guaranteed predictions. This is entertainment and reflection only.\n" +
+		"Write plain paragraphs separated by blank lines; do not use markdown, tables, bullet lists, or decorative heading symbols.\n" +
+		"Keep the reading under about 500 words and finish every thought.\n" +
+		`Respond entirely in ${languageName}. The supplied language code is ${language}.`;
+	const birthLine =
+		`Today's date: ${todayIso}\n` +
+		(hand ? `Hand in the photo: ${hand} hand\n` : "") +
+		(birthDate ? `Date of birth (YYYY-MM-DD): ${birthDate}\nBirth year: ${birthDate.slice(0, 4)}\nCurrent age: ${age} years old\n` : "Date of birth: not provided\n");
+	const birthPrefix = `${birthLine}\n`;
+	const userText = userQuestion
+		? `${birthPrefix}User question: ${userQuestion}\n\nPlease read this palm photo and tell the story of past, present, and future with age ranges, focused on my question.`
+		: `${birthPrefix}Please read this palm photo and tell the story of past, present, and future with age ranges.`;
+
+	const model = env.GROQ_PALM_MODEL || "qwen/qwen3.8-27b";
+	const requestBody = JSON.stringify({
+		model,
+		temperature: 0.4,
+		max_tokens: 2200,
+		messages: [
+			{ role: "system", content: systemPrompt },
+			{
+				role: "user",
+				content: [
+					{ type: "text", text: userText },
+					{
+						type: "image_url",
+						image_url: { url: `data:${image.mimeType};base64,${image.data}` },
+					},
+				],
+			},
+		],
+	});
+
+	const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+	const trail = [];
+	for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+		try {
+			const response = await fetch(GROQ_ENDPOINT, {
+				method: "POST",
+				headers: {
+					Authorization: `Bearer ${env.GROQ_API_KEY}`,
+					"Content-Type": "application/json",
+				},
+				body: requestBody,
+				signal: AbortSignal.timeout(30000),
+			});
+
+			if (response.ok) {
+				const body = await response.json();
+				const content = body.choices && body.choices[0] && body.choices[0].message && body.choices[0].message.content;
+				const reading = typeof content === "string" ? content.trim() : "";
+				if (reading.length >= 40) {
+					return json({ reading, model, provider: "groq", debug: [...trail, `${model}: ok`].join(" | ") }, 200, cors);
+				}
+				trail.push(`${model}: empty`);
+				console.error(`Groq empty palm reading (${model}, attempt ${attempt}/${MAX_ATTEMPTS})`);
+			} else {
+				trail.push(`${model}: HTTP ${response.status}`);
+				console.error(`Groq HTTP ${response.status} (palm, ${model}, attempt ${attempt}/${MAX_ATTEMPTS})`);
+			}
+		} catch (error) {
+			trail.push(`${model}: ${(error && error.message) || "request failed"}`);
+			console.error(`Groq palm request failed (${model}, attempt ${attempt}/${MAX_ATTEMPTS})`, error && error.message);
+		}
+
+		if (attempt < MAX_ATTEMPTS) await sleep(500 * attempt);
+	}
+
+	return apiError(
+		"gypsy_tarot_ai_unavailable",
+		"AI palm teller is temporarily unavailable. Please try again soon.",
+		502,
+		cors,
+		trail.join(" | "),
+	);
+}
+
 async function handleVisitors(request, env, cors) {
 	if (!env.KV) return apiError("gypsy_tarot_visitors_unconfigured", "Visitor counter is not configured.", 503, cors);
 	let count = parseInt((await env.KV.get(VISITOR_KEY)) || "0", 10);
@@ -360,10 +524,13 @@ export default {
 
 		if (path === "/reading" && request.method === "POST") return handleReading(request, env, cors);
 		if (path === "/dream" && request.method === "POST") return handleDream(request, env, cors);
+		if (path === "/palm" && request.method === "POST") return handlePalm(request, env, cors);
 		if (path === "/visitors" && (request.method === "GET" || request.method === "POST")) {
 			return handleVisitors(request, env, cors);
 		}
-		if (path === "/reading" || path === "/dream" || path === "/visitors") return apiError("method_not_allowed", "Method not allowed.", 405, cors);
+		if (path === "/reading" || path === "/dream" || path === "/palm" || path === "/visitors") {
+			return apiError("method_not_allowed", "Method not allowed.", 405, cors);
+		}
 		return apiError("not_found", "Not found.", 404, cors);
 	},
 };

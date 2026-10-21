@@ -7,8 +7,10 @@ compatibility_date = "2024-11-01"
 ALLOWED_ORIGINS = "https://www.doomanman.com,https://doomanman.com"
 AI_RATE_LIMIT = "5"
 DREAM_RATE_LIMIT = "30"
+PALM_RATE_LIMIT = "10"
 GROQ_LLM_MODEL1 = "openai/gpt-oss-120b"
 GROQ_LLM_MODEL2 = "openai/gpt-oss-20b"
+GROQ_PALM_MODEL = "qwen/qwen3.8-27b"
 
 # Create with: npx wrangler kv namespace create KV  (then paste the id)
 [[kv_namespaces]]
