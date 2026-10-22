@@ -3,3 +3,4 @@ tarot-gypsy/app/.envrc
 tarot-gypsy/be/.dev.vars.example
 tarot-gypsy/be/.dev.vars.example
 tarot-gypsy/.vscode/settings.json
+tarot-gypsy_back/.vscode/settings.json

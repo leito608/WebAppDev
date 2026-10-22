@@ -21,3 +21,4 @@
 		<button class="language-switch" type="button" id="language-toggle" aria-label="Switch language">ภาษาไทย</button>
 	</div>
 </header>
+<?php gypsy_tarot_render_ad( 'left' ); ?>
