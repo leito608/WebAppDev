@@ -49,7 +49,7 @@ async function checkRateLimit(request, env) {
 	const ip = request.headers.get("CF-Connecting-IP") || "unknown";
 	const key = `rate:${ip}`;
 	const count = parseInt((await env.KV.get(key)) || "0", 10);
-	const limit = parseInt(env.AI_RATE_LIMIT || "5", 10);
+	const limit = parseInt(env.AI_RATE_LIMIT || "500", 10);
 	if (count >= limit) return false;
 	await env.KV.put(key, String(count + 1), { expirationTtl: RATE_WINDOW_SECONDS });
 	return true;
@@ -233,7 +233,7 @@ async function handleDream(request, env, cors) {
 	if (env.KV) {
 		const key = `dream-rate:${request.headers.get("CF-Connecting-IP") || "unknown"}`;
 		const count = parseInt((await env.KV.get(key)) || "0", 10);
-		if (count >= parseInt(env.DREAM_RATE_LIMIT || "10", 10)) {
+		if (count >= parseInt(env.DREAM_RATE_LIMIT || "500", 10)) {
 			return apiError("gypsy_tarot_ai_rate_limited", "Please wait a little before requesting another dream reading.", 429, cors);
 		}
 		await env.KV.put(key, String(count + 1), { expirationTtl: RATE_WINDOW_SECONDS });
@@ -401,7 +401,7 @@ async function handlePalm(request, env, cors) {
 	if (env.KV) {
 		const key = `palm-rate:${request.headers.get("CF-Connecting-IP") || "unknown"}`;
 		const count = parseInt((await env.KV.get(key)) || "0", 10);
-		if (count >= parseInt(env.PALM_RATE_LIMIT || "10", 10)) {
+		if (count >= parseInt(env.PALM_RATE_LIMIT || "500", 10)) {
 			return apiError("gypsy_tarot_ai_rate_limited", "Please wait a little before requesting another palm reading.", 429, cors);
 		}
 		await env.KV.put(key, String(count + 1), { expirationTtl: RATE_WINDOW_SECONDS });
