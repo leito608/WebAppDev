@@ -13,6 +13,7 @@
 			dreamLabel: "เล่าความฝันของคุณ", dreamPlaceholder: "พิมพ์สิ่งที่ฝันเห็น...", dreamButton: "ทำนายฝัน",
 			dreamDisclaimer: "คำทำนายเป็นความเชื่อและแนวทางเพื่อความบันเทิง ความฝันไม่ได้ยืนยันว่าจะเกิดเหตุการณ์ใดขึ้นจริง",
 			resultTitle: "คำทำนายฝันของคุณ",
+			shareFacebook: "แชร์บน Facebook", copyReading: "คัดลอกคำทำนาย",
 			loading: "กำลังค้นหาและเรียบเรียงคำทำนายฝันของคุณ…",
 			empty: "พิมพ์ความฝันของคุณก่อนกดทำนาย",
 			error: "ตอนนี้ยังทำนายฝันไม่ได้ ลองใหม่อีกครั้งในอีกสักครู่"
@@ -28,6 +29,7 @@
 			dreamLabel: "Describe your dream", dreamPlaceholder: "Type what you dreamed about...", dreamButton: "Tell my dream",
 			dreamDisclaimer: "Interpretations are beliefs and guidance for entertainment only. A dream does not confirm that any event will happen.",
 			resultTitle: "Your dream reading",
+			shareFacebook: "Share on Facebook", copyReading: "Copy reading",
 			loading: "Looking up and interpreting your dream…",
 			empty: "Describe your dream first.",
 			error: "The dream teller is unavailable right now. Please try again shortly."
@@ -41,6 +43,7 @@
 	const aiResult = document.getElementById("dream-ai-result");
 	const aiTitle = document.getElementById("dream-ai-title");
 	const aiBody = document.getElementById("dream-ai-body");
+	const shareActions = aiResult.querySelector("[data-share-actions]");
 	let language = (function () {
 		try { return window.localStorage.getItem("gypsyLanguage") === "en" ? "en" : "th"; } catch (error) { return "th"; }
 	}());
@@ -49,7 +52,19 @@
 		return translations[language][key];
 	}
 
-	function showResult(paragraphs, busy, debug) {
+	function scrollResultIntoViewOnMobile() {
+		if (!window.matchMedia("(max-width: 600px)").matches) {
+			return;
+		}
+		window.requestAnimationFrame(function () {
+			aiResult.scrollIntoView({
+				behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+				block: "start"
+			});
+		});
+	}
+
+	function showResult(paragraphs, busy, debug, shareable) {
 		aiTitle.textContent = t("resultTitle");
 		aiTitle.hidden = busy;
 		aiResult.classList.toggle("is-loading", busy);
@@ -86,6 +101,7 @@
 		}
 		aiResult.setAttribute("aria-busy", String(busy));
 		aiResult.hidden = false;
+		shareActions.hidden = busy || !shareable;
 	}
 
 	function setLanguage(next) {
@@ -136,12 +152,13 @@
 			}
 			showResult(data.reading.split(/\n\s*\n/).map(function (paragraph) {
 				return paragraph.trim();
-			}).filter(Boolean), false, [data.model, data.debug].filter(Boolean).join(" — "));
+			}).filter(Boolean), false, [data.model, data.debug].filter(Boolean).join(" — "), true);
 		} catch (error) {
 			console.warn(error);
 			showResult([t("error")], false, [lastDebug, error && error.message].filter(Boolean).join(" — "));
 		} finally {
 			submit.disabled = false;
+			scrollResultIntoViewOnMobile();
 		}
 	});
 

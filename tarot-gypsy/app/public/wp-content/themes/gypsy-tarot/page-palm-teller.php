@@ -51,6 +51,16 @@ get_header();
 			<section class="dream-ai-result" id="palm-ai-result" aria-live="polite" aria-busy="false" hidden>
 				<h3 class="dream-ai-title" id="palm-ai-title"></h3>
 				<div class="dream-ai-body" id="palm-ai-body"></div>
+				<div class="share-result-actions" data-share-actions hidden>
+					<button class="share-result-button share-facebook-button" type="button" data-share-facebook>
+						<span data-i18n="shareFacebook">แชร์บน Facebook</span>
+						<span aria-hidden="true">↗</span>
+					</button>
+					<button class="share-result-button share-copy-button" type="button" data-copy-reading>
+						<span data-i18n="copyReading">คัดลอกคำทำนาย</span>
+					</button>
+					<p class="share-result-status" data-share-status aria-live="polite"></p>
+				</div>
 			</section>
 			<p class="dream-disclaimer" data-i18n="palmDisclaimer">คำทำนายลายมือเป็นความเชื่อและแนวทางเพื่อความบันเทิง ไม่ใช่คำทำนายที่รับประกันผล และไม่ใช่คำแนะนำทางการแพทย์หรือวิชาชีพ</p>
 		</div>

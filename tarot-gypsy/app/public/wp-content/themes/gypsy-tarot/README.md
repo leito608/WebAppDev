@@ -23,6 +23,10 @@ A no-account, bilingual tarot-reading experience built as an installable WordPre
 3. Configure the Groq API key and model IDs on the server (see **AI configuration** below).
 4. Open the site and choose **Start your reading**. No payment setup or visitor account is needed.
 
+## Social sharing previews
+
+The homepage, dream teller, and palm teller use `assets/images/tarot-share.jpg` (1200 × 630) for Open Graph and Twitter preview images. The image URL must be publicly reachable over HTTPS for social crawlers. After deploying a theme update, use Meta's Sharing Debugger to refresh Facebook's cached preview.
+
 ## Dream interpretation
 
 The `/dream-teller/` page lets visitors describe a dream and sends it to the Cloudflare Worker `/dream` route (Gemini). The page shares the Thai/English toggle with the home page via `localStorage` (`gypsyLanguage`). The interpretations are reflective and for entertainment; they do not predict guaranteed events or replace professional advice.

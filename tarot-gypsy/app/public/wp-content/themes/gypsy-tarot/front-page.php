@@ -116,6 +116,16 @@ get_header();
 					<?php endif; ?>
 					<div class="result-cards" id="result-cards"></div>
 					<div class="reading-reflection" id="reading-reflection"></div>
+					<div class="share-result-actions" data-share-actions hidden>
+						<button class="share-result-button share-facebook-button" type="button" data-share-facebook>
+							<span data-i18n="shareFacebook">แชร์บน Facebook</span>
+							<span aria-hidden="true">↗</span>
+						</button>
+						<button class="share-result-button share-copy-button" type="button" data-copy-reading>
+							<span data-i18n="copyReading">คัดลอกคำทำนาย</span>
+						</button>
+						<p class="share-result-status" data-share-status aria-live="polite"></p>
+					</div>
 					<button class="primary-button again-button" type="button" id="start-again">
 						<span data-i18n="startAgain">Would you like another reading?</span>
 						<span aria-hidden="true">↻</span>

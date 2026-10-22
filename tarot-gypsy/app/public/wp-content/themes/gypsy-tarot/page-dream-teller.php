@@ -29,6 +29,16 @@ get_header();
 			<section class="dream-ai-result" id="dream-ai-result" aria-live="polite" aria-busy="false" hidden>
 				<h3 class="dream-ai-title" id="dream-ai-title"></h3>
 				<div class="dream-ai-body" id="dream-ai-body"></div>
+				<div class="share-result-actions" data-share-actions hidden>
+					<button class="share-result-button share-facebook-button" type="button" data-share-facebook>
+						<span data-i18n="shareFacebook">แชร์บน Facebook</span>
+						<span aria-hidden="true">↗</span>
+					</button>
+					<button class="share-result-button share-copy-button" type="button" data-copy-reading>
+						<span data-i18n="copyReading">คัดลอกคำทำนาย</span>
+					</button>
+					<p class="share-result-status" data-share-status aria-live="polite"></p>
+				</div>
 			</section>
 			<p class="dream-disclaimer" data-i18n="dreamDisclaimer">คำทำนายเป็นความเชื่อและแนวทางเพื่อความบันเทิง ความฝันไม่ได้ยืนยันว่าจะเกิดเหตุการณ์ใดขึ้นจริง</p>
 		</div>

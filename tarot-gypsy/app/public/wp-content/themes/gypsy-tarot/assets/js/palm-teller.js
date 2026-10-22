@@ -24,6 +24,7 @@
 			palmButton: "ดูลายมือ",
 			palmDisclaimer: "คำทำนายลายมือเป็นความเชื่อและแนวทางเพื่อความบันเทิง ไม่ใช่คำทำนายที่รับประกันผล และไม่ใช่คำแนะนำทางการแพทย์หรือวิชาชีพ",
 			resultTitle: "คำทำนายลายมือของคุณ",
+			shareFacebook: "แชร์บน Facebook", copyReading: "คัดลอกคำทำนาย",
 			loading: "กำลังอ่านลายมือจากรูปของคุณ…",
 			empty: "เลือกรูปฝ่ามือก่อนกดดูลายมือ",
 			badType: "รองรับเฉพาะไฟล์รูป JPEG, PNG หรือ WebP",
@@ -49,6 +50,7 @@
 			palmButton: "Read my palm",
 			palmDisclaimer: "Palm readings are beliefs and guidance for entertainment only. They are not guaranteed predictions and are not medical or professional advice.",
 			resultTitle: "Your palm reading",
+			shareFacebook: "Share on Facebook", copyReading: "Copy reading",
 			loading: "Reading the lines in your palm photo…",
 			empty: "Choose a palm photo first.",
 			badType: "Please use a JPEG, PNG, or WebP image.",
@@ -71,6 +73,7 @@
 	const aiResult = document.getElementById("palm-ai-result");
 	const aiTitle = document.getElementById("palm-ai-title");
 	const aiBody = document.getElementById("palm-ai-body");
+	const shareActions = aiResult.querySelector("[data-share-actions]");
 	let language = (function () {
 		try { return window.localStorage.getItem("gypsyLanguage") === "en" ? "en" : "th"; } catch (error) { return "th"; }
 	}());
@@ -78,6 +81,18 @@
 
 	function t(key) {
 		return translations[language][key];
+	}
+
+	function scrollResultIntoViewOnMobile() {
+		if (!window.matchMedia("(max-width: 600px)").matches) {
+			return;
+		}
+		window.requestAnimationFrame(function () {
+			aiResult.scrollIntoView({
+				behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+				block: "start"
+			});
+		});
 	}
 
 	// Accepts DD/MM/YYYY (also - or . separators, or YYYY-MM-DD). Buddhist-era years are converted. Returns ISO date, "" when empty, or null when invalid.
@@ -101,7 +116,7 @@
 		return date.toISOString().slice(0, 10);
 	}
 
-	function showResult(paragraphs, busy, debug) {
+	function showResult(paragraphs, busy, debug, shareable) {
 		aiTitle.textContent = t("resultTitle");
 		aiTitle.hidden = busy;
 		aiResult.classList.toggle("is-loading", busy);
@@ -138,6 +153,7 @@
 		}
 		aiResult.setAttribute("aria-busy", String(busy));
 		aiResult.hidden = false;
+		shareActions.hidden = busy || !shareable;
 	}
 
 	function setLanguage(next) {
@@ -347,12 +363,13 @@
 			}
 			showResult(data.reading.split(/\n\s*\n/).map(function (paragraph) {
 				return paragraph.trim();
-			}).filter(Boolean), false, [data.model, data.debug].filter(Boolean).join(" — "));
+			}).filter(Boolean), false, [data.model, data.debug].filter(Boolean).join(" — "), true);
 		} catch (error) {
 			console.warn(error);
 			showResult([t("error")], false, [lastDebug, error && error.message].filter(Boolean).join(" — "));
 		} finally {
 			submit.disabled = !pendingImage;
+			scrollResultIntoViewOnMobile();
 		}
 	});
 

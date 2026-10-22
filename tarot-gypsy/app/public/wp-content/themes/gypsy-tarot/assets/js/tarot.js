@@ -2,26 +2,26 @@
 	"use strict";
 
 	const majorArcana = [
-		["The Fool", "คนโง่", "A fresh beginning invites curiosity and trust.", "A pause may help you avoid a leap without looking.", "การเริ่มต้นใหม่ชวนให้เปิดใจและเชื่อมั่นในเส้นทาง", "หยุดคิดสักนิดก่อนก้าวไปข้างหน้าอย่างไม่ระมัดระวัง"],
-		["The Magician", "นักมายากล", "Your skills and resources are ready to be put to use.", "Scattered focus is making your abilities harder to use.", "ทักษะและทรัพยากรที่มีพร้อมให้คุณนำมาใช้", "สมาธิที่กระจัดกระจายอาจทำให้ใช้ความสามารถได้ไม่เต็มที่"],
-		["The High Priestess", "มหาปุโรหิตหญิง", "Listen closely to your intuition and what has not yet been said.", "Make room for quiet reflection before acting.", "รับฟังสัญชาตญาณและสิ่งที่ยังไม่ได้เอ่ยออกมา", "ใช้เวลาทบทวนอย่างสงบก่อนลงมือทำ"],
+		["The Fool", "เดอะฟูล", "A fresh beginning invites curiosity and trust.", "A pause may help you avoid a leap without looking.", "การเริ่มต้นใหม่ชวนให้เปิดใจและเชื่อมั่นในเส้นทาง", "หยุดคิดสักนิดก่อนก้าวไปข้างหน้าอย่างไม่ระมัดระวัง"],
+		["The Magician", "นักเวท", "Your skills and resources are ready to be put to use.", "Scattered focus is making your abilities harder to use.", "ทักษะและทรัพยากรที่มีพร้อมให้คุณนำมาใช้", "สมาธิที่กระจัดกระจายอาจทำให้ใช้ความสามารถได้ไม่เต็มที่"],
+		["The High Priestess", "นักบวชหญิง", "Listen closely to your intuition and what has not yet been said.", "Make room for quiet reflection before acting.", "รับฟังสัญชาตญาณและสิ่งที่ยังไม่ได้เอ่ยออกมา", "ใช้เวลาทบทวนอย่างสงบก่อนลงมือทำ"],
 		["The Empress", "จักรพรรดินี", "Care, creativity, and abundance are ready to grow.", "Restore your energy and nurture your own needs.", "ความเอาใจใส่ ความคิดสร้างสรรค์ และความอุดมสมบูรณ์กำลังเติบโต", "เติมพลังและหันมาใส่ใจความต้องการของตัวเอง"],
 		["The Emperor", "จักรพรรดิ", "Structure and clear boundaries can bring steadiness.", "Consider where control or rigidity is holding you back.", "โครงสร้างและขอบเขตที่ชัดเจนช่วยสร้างความมั่นคง", "ลองพิจารณาว่าการควบคุมหรือยึดติดเกินไปกำลังฉุดรั้งคุณหรือไม่"],
-		["The Hierophant", "มหาปุโรหิต", "Shared wisdom or a trusted tradition can guide you.", "Question whether an old rule still serves your path.", "ภูมิปัญญาที่สืบทอดหรือคำแนะนำที่ไว้ใจได้ช่วยชี้ทาง", "ทบทวนว่ากฎเกณฑ์เดิมยังเหมาะกับเส้นทางของคุณหรือไม่"],
-		["The Lovers", "คนรัก", "A meaningful connection or aligned choice is coming into focus.", "Reconnect with your values before making a choice.", "ความสัมพันธ์ที่มีความหมายหรือทางเลือกที่สอดคล้องกำลังชัดเจนขึ้น", "กลับมาทบทวนคุณค่าของตัวเองก่อนตัดสินใจ"],
+		["The Hierophant", "นักบวช", "Shared wisdom or a trusted tradition can guide you.", "Question whether an old rule still serves your path.", "ภูมิปัญญาที่สืบทอดหรือคำแนะนำที่ไว้ใจได้ช่วยชี้ทาง", "ทบทวนว่ากฎเกณฑ์เดิมยังเหมาะกับเส้นทางของคุณหรือไม่"],
+		["The Lovers", "คู่รัก", "A meaningful connection or aligned choice is coming into focus.", "Reconnect with your values before making a choice.", "ความสัมพันธ์ที่มีความหมายหรือทางเลือกที่สอดคล้องกำลังชัดเจนขึ้น", "กลับมาทบทวนคุณค่าของตัวเองก่อนตัดสินใจ"],
 		["The Chariot", "รถศึก", "Steady determination can carry you through competing forces.", "A slower pace and a clearer direction may be needed.", "ความมุ่งมั่นจะช่วยพาคุณผ่านแรงกดดันที่ขัดแย้งกัน", "อาจต้องชะลอจังหวะและกำหนดทิศทางให้ชัดขึ้น"],
-		["Strength", "พลัง", "Gentle courage and patience are stronger than force.", "Treat yourself with compassion as you rebuild confidence.", "ความกล้าหาญอย่างอ่อนโยนและความอดทนทรงพลังยิ่งกว่าการฝืน", "เมตตาต่อตัวเองระหว่างค่อย ๆ สร้างความมั่นใจกลับคืน"],
+		["Strength", "ความแข็งแกร่ง", "Gentle courage and patience are stronger than force.", "Treat yourself with compassion as you rebuild confidence.", "ความกล้าหาญอย่างอ่อนโยนและความอดทนทรงพลังยิ่งกว่าการฝืน", "เมตตาต่อตัวเองระหว่างค่อย ๆ สร้างความมั่นใจกลับคืน"],
 		["The Hermit", "ฤๅษี", "Time alone can help you find the answer within.", "Reach out when reflection starts to become isolation.", "การอยู่กับตัวเองสักพักอาจช่วยให้พบคำตอบภายในใจ", "ขอความช่วยเหลือเมื่อการทบทวนเริ่มกลายเป็นการแยกตัว"],
 		["Wheel of Fortune", "วงล้อแห่งโชคชะตา", "A change in circumstances opens a new possibility.", "Be patient with a cycle still working itself out.", "การเปลี่ยนแปลงเปิดโอกาสใหม่ให้คุณ", "อดทนกับวัฏจักรที่ยังดำเนินไปไม่สิ้นสุด"],
 		["Justice", "ความยุติธรรม", "Honesty and thoughtful choices help restore balance.", "Look carefully at the facts and your part in the situation.", "ความซื่อสัตย์และการตัดสินใจอย่างรอบคอบช่วยคืนสมดุล", "พิจารณาข้อเท็จจริงและบทบาทของคุณในสถานการณ์นี้"],
-		["The Hanged Man", "ชายแขวนคอ", "A pause or new perspective can reveal another way forward.", "Release resistance and reconsider what you are holding onto.", "การหยุดพักหรือเปลี่ยนมุมมองอาจเผยทางไปต่อ", "ปล่อยวางแรงต้านและทบทวนสิ่งที่คุณกำลังยึดไว้"],
+		["The Hanged Man", "ชายผู้ถูกแขวน", "A pause or new perspective can reveal another way forward.", "Release resistance and reconsider what you are holding onto.", "การหยุดพักหรือเปลี่ยนมุมมองอาจเผยทางไปต่อ", "ปล่อยวางแรงต้านและทบทวนสิ่งที่คุณกำลังยึดไว้"],
 		["Death", "ความตาย", "An ending makes space for a necessary transformation.", "Accepting a change may be easier than prolonging an ending.", "การสิ้นสุดเปิดทางให้การเปลี่ยนแปลงที่จำเป็น", "การยอมรับความเปลี่ยนแปลงอาจดีกว่าการยืดเยื้อสิ่งที่จบลงแล้ว"],
-		["Temperance", "ความพอดี", "Patience and balance can bring different pieces together.", "Try a gentler pace and bring extremes back into balance.", "ความอดทนและสมดุลช่วยประสานสิ่งต่าง ๆ เข้าด้วยกัน", "ค่อย ๆ ปรับจังหวะและดึงสิ่งที่สุดโต่งกลับสู่สมดุล"],
+		["Temperance", "ความพอประมาณ", "Patience and balance can bring different pieces together.", "Try a gentler pace and bring extremes back into balance.", "ความอดทนและสมดุลช่วยประสานสิ่งต่าง ๆ เข้าด้วยกัน", "ค่อย ๆ ปรับจังหวะและดึงสิ่งที่สุดโต่งกลับสู่สมดุล"],
 		["The Devil", "ปีศาจ", "Notice the attachments and patterns shaping your choices.", "A limiting pattern can loosen when you name it honestly.", "สังเกตความยึดติดและรูปแบบที่กำลังกำหนดทางเลือกของคุณ", "รูปแบบที่จำกัดคุณอาจคลี่คลายเมื่อกล้ายอมรับอย่างตรงไปตรงมา"],
 		["The Tower", "หอคอย", "A sudden truth clears away what was built on shaky ground.", "Make space for needed change instead of delaying it.", "ความจริงที่ปรากฏช่วยรื้อสิ่งที่ตั้งอยู่บนพื้นฐานไม่มั่นคง", "เปิดรับการเปลี่ยนแปลงที่จำเป็นแทนการเลื่อนออกไป"],
-		["The Star", "ดวงดาว", "Hope and renewal are returning after a difficult stretch.", "Rest and reconnect with the small things that restore hope.", "ความหวังและการเริ่มต้นใหม่กำลังกลับมาหลังช่วงเวลาที่ยากลำบาก", "พักผ่อนและกลับไปหาสิ่งเล็ก ๆ ที่ช่วยเติมความหวัง"],
+		["The Star", "ดาว", "Hope and renewal are returning after a difficult stretch.", "Rest and reconnect with the small things that restore hope.", "ความหวังและการเริ่มต้นใหม่กำลังกลับมาหลังช่วงเวลาที่ยากลำบาก", "พักผ่อนและกลับไปหาสิ่งเล็ก ๆ ที่ช่วยเติมความหวัง"],
 		["The Moon", "พระจันทร์", "Move gently through uncertainty and listen to your dreams.", "Separate fear from intuition before drawing conclusions.", "ค่อย ๆ ก้าวผ่านความไม่แน่นอนและรับฟังความฝันของคุณ", "แยกความกลัวออกจากสัญชาตญาณก่อนสรุปเรื่องราว"],
-		["The Sun", "ดวงอาทิตย์", "Warmth, clarity, and joy are easier to reach now.", "Let yourself receive joy, even if confidence is still growing.", "ความอบอุ่น ความชัดเจน และความสุขอยู่ใกล้แค่เอื้อม", "เปิดใจรับความสุขแม้ความมั่นใจยังค่อย ๆ เติบโต"],
+		["The Sun", "พระอาทิตย์", "Warmth, clarity, and joy are easier to reach now.", "Let yourself receive joy, even if confidence is still growing.", "ความอบอุ่น ความชัดเจน และความสุขอยู่ใกล้แค่เอื้อม", "เปิดใจรับความสุขแม้ความมั่นใจยังค่อย ๆ เติบโต"],
 		["Judgement", "การพิพากษา", "An honest reckoning invites you to answer a new calling.", "Release self-judgment and take the next small step.", "การทบทวนอย่างซื่อตรงชวนให้ตอบรับเสียงเรียกครั้งใหม่", "ปล่อยวางการตัดสินตัวเองและเริ่มจากก้าวเล็ก ๆ"],
 		["The World", "โลก", "A meaningful chapter is reaching a satisfying completion.", "Notice what is unfinished and what you have already accomplished.", "บทสำคัญในชีวิตกำลังเดินทางสู่บทสรุปที่น่าพอใจ", "สังเกตทั้งสิ่งที่ยังไม่เสร็จและสิ่งที่คุณทำสำเร็จแล้ว"]
 	];
@@ -51,7 +51,7 @@
 	];
 
 	const ranks = [
-		["Ace", "หนึ่ง", "a promising new beginning", "a beginning that needs patience", "การเริ่มต้นใหม่ที่เปี่ยมด้วยโอกาส", "การเริ่มต้นที่ต้องอาศัยความอดทน"],
+		["Ace", "เอซ", "a promising new beginning", "a beginning that needs patience", "การเริ่มต้นใหม่ที่เปี่ยมด้วยโอกาส", "การเริ่มต้นที่ต้องอาศัยความอดทน"],
 		["Two", "สอง", "a choice or partnership taking shape", "indecision or competing priorities", "ทางเลือกหรือความร่วมมือที่กำลังก่อตัว", "ความลังเลหรือสิ่งสำคัญหลายอย่างที่ขัดแย้งกัน"],
 		["Three", "สาม", "progress made through collaboration", "miscommunication or work that needs alignment", "ความก้าวหน้าที่เกิดจากการร่วมมือกัน", "การสื่อสารคลาดเคลื่อนหรืองานที่ต้องปรับให้สอดคล้อง"],
 		["Four", "สี่", "a moment to build stability and appreciate what is here", "restlessness or a need to revisit your foundations", "ช่วงเวลาสร้างความมั่นคงและเห็นคุณค่าสิ่งที่มี", "ความกระสับกระส่ายหรือการกลับไปทบทวนพื้นฐาน"],
@@ -61,7 +61,7 @@
 		["Eight", "แปด", "dedication and momentum built through steady practice", "burnout, scattered effort, or a delayed step", "ความทุ่มเทและความก้าวหน้าจากการฝึกฝนอย่างสม่ำเสมอ", "ความเหนื่อยล้า ความพยายามที่กระจัดกระจาย หรือการก้าวที่ล่าช้า"],
 		["Nine", "เก้า", "earned confidence and the strength to persevere", "exhaustion or a need to protect your energy", "ความมั่นใจที่ได้มาด้วยตนเองและพลังใจที่จะสู้ต่อ", "ความเหนื่อยล้าหรือความจำเป็นในการปกป้องพลังใจ"],
 		["Ten", "สิบ", "a culmination that brings both responsibility and reward", "an overloaded burden ready to be shared or released", "บทสรุปที่มาพร้อมทั้งความรับผิดชอบและรางวัล", "ภาระที่หนักเกินไปและควรแบ่งปันหรือปล่อยวาง"],
-		["Page", "มหาดเล็ก", "curiosity and an invitation to learn by trying", "hesitation or a message not yet fully understood", "ความอยากรู้อยากเห็นและโอกาสเรียนรู้จากการลงมือทำ", "ความลังเลหรือสารที่ยังเข้าใจไม่ครบถ้วน"],
+		["Page", "เพจ", "curiosity and an invitation to learn by trying", "hesitation or a message not yet fully understood", "ความอยากรู้อยากเห็นและโอกาสเรียนรู้จากการลงมือทำ", "ความลังเลหรือสารที่ยังเข้าใจไม่ครบถ้วน"],
 		["Knight", "อัศวิน", "focused movement toward something that matters", "rushing ahead or acting without enough reflection", "การมุ่งหน้าอย่างตั้งใจสู่สิ่งที่มีความหมาย", "การเร่งรีบหรือการลงมือโดยยังไม่ไตร่ตรองให้ดี"],
 		["Queen", "ราชินี", "mature understanding, care, and confidence", "neglected needs or an invitation to restore balance", "ความเข้าใจที่สุขุม การดูแลเอาใจใส่ และความมั่นใจ", "ความต้องการที่ถูกละเลยหรือคำชวนให้คืนสู่สมดุล"],
 		["King", "ราชา", "wise leadership and steady command of your strengths", "rigidity or a need to lead with more openness", "ภาวะผู้นำที่ชาญฉลาดและใช้จุดแข็งได้อย่างมั่นคง", "ความยึดติดหรือความจำเป็นในการเปิดใจนำผู้อื่นมากขึ้น"]
@@ -80,7 +80,7 @@
 	ranks.forEach(function (rank, rankIndex) {
 			cardData.push({
 				name: rank[0] + " of " + suit.name,
-				thai: suit.thai + " " + rank[1],
+				thai: rank[1] + suit.thai,
 				symbol: suit.symbol,
 			image: suit.name.toLowerCase() + "-" + String(rankIndex + 1).padStart(2, "0") + ".jpeg",
 				upright: rank[2] + ", expressed through " + suit.theme + ".",
@@ -126,6 +126,7 @@
 			selectedCardBack: "Selected card {number}, face down",
 			deckLabel: "Choose three cards from the full tarot deck",
 			past: "Past", present: "Present", future: "Future", resultTitle: "Your reading",
+			shareFacebook: "Share on Facebook", copyReading: "Copy reading",
 			stepThree: "03 · Your reading",
 			stepThreeTitle: "Ready to see what your cards have to say?",
 			stepThreeCopy: "Your cards are waiting. Reveal them when you’re ready.",
@@ -173,6 +174,7 @@
 			deckLabel: "เลือกไพ่สามใบจากสำรับทาโรต์ทั้งชุด",
 			past: "สิ่งที่ผ่านมา", present: "เรื่องตอนนี้", future: "สิ่งที่รออยู่",
 			resultTitle: "ไพ่ทั้งสามใบบอกอะไรคุณบ้าง",
+			shareFacebook: "แชร์บน Facebook", copyReading: "คัดลอกคำทำนาย",
 			stepThree: "03 · คำทำนายของคุณ",
 			stepThreeTitle: "พร้อมดูหรือยังว่าไพ่ทั้งสามใบบอกอะไร?",
 			stepThreeCopy: "ไพ่ของคุณคว่ำรออยู่ กดเปิดได้เมื่อพร้อม",
@@ -220,6 +222,7 @@
 	const readingStepThree = document.getElementById("reading-step-three");
 	const getResultButton = document.getElementById("get-result");
 	const result = document.getElementById("reading-result");
+	const shareActions = result.querySelector("[data-share-actions]");
 	const questionInput = document.getElementById("reading-question");
 	const aiStatus = document.getElementById("ai-status");
 	const aiDebug = document.getElementById("ai-debug");
@@ -240,6 +243,21 @@
 	let isShuffled = false;
 	let isAnimatingShuffle = false;
 	let shuffleTimer = null;
+
+	function scrollResultIntoViewOnMobile() {
+		if (window.innerWidth > 850) {
+			return;
+		}
+		window.requestAnimationFrame(function () {
+			window.requestAnimationFrame(function () {
+				const top = window.pageYOffset + result.getBoundingClientRect().top - 16;
+				window.scrollTo({
+					top: Math.max(0, top),
+					behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"
+				});
+			});
+		});
+	}
 
 	function shuffle(cards) {
 		for (let index = cards.length - 1; index > 0; index -= 1) {
@@ -633,6 +651,7 @@
 		});
 		getResultButton.disabled = true;
 		cardPicker.hidden = true;
+		shareActions.hidden = true;
 		aiReading = null;
 		aiReadingState = "loading";
 		aiNote = "";
@@ -763,6 +782,8 @@
 			window.clearTimeout(requestTimeout);
 		}
 		renderResult();
+		shareActions.hidden = false;
+		scrollResultIntoViewOnMobile();
 	});
 
 	topicButtons.forEach(function (button) {

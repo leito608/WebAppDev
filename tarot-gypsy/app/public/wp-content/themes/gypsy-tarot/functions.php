@@ -90,6 +90,7 @@ function gypsy_tarot_seo_head() {
 		$title       = 'ดูดวงแม่นๆ — ทำนายฝัน';
 		$description = 'ค้นหาความหมายของความฝันจากคลังคำทำนายภาษาไทย พร้อมมุมมองชวนทบทวนใจ ใช้งานฟรี ไม่ต้องสมัครสมาชิก ดูดวงแม่นๆ ดูดวง ดูไพ่ ดูลายมือ';
 		$url         = home_url( '/dream-teller/' );
+		$image       = get_theme_file_uri( '/assets/images/tarot-share.jpg' );
 		?>
 		<meta name="description" content="<?php echo esc_attr( $description ); ?>">
 		<meta name="keywords" content="ทำนายฝัน, ตีความความฝัน, ดูดวงแม่นๆ, ดูดวงแม่นแม่น, ดูดวง, ดูไพ่, ทำนายฝัน, ดูลายมือ">
@@ -99,6 +100,13 @@ function gypsy_tarot_seo_head() {
 		<meta property="og:title" content="<?php echo esc_attr( $title ); ?>">
 		<meta property="og:description" content="<?php echo esc_attr( $description ); ?>">
 		<meta property="og:url" content="<?php echo esc_url( $url ); ?>">
+		<meta property="og:image" content="<?php echo esc_url( $image ); ?>">
+		<meta property="og:image:type" content="image/jpeg">
+		<meta property="og:image:width" content="1200">
+		<meta property="og:image:height" content="630">
+		<meta property="og:image:alt" content="Gypsy Tarot reading with The Fool tarot card">
+		<meta name="twitter:card" content="summary_large_image">
+		<meta name="twitter:image" content="<?php echo esc_url( $image ); ?>">
 		<meta property="og:locale" content="th_TH">
 		<?php
 		return;
@@ -108,6 +116,7 @@ function gypsy_tarot_seo_head() {
 		$title       = 'ดูดวงแม่นๆ — ดูลายมือ';
 		$description = 'อัปโหลดรูปฝ่ามือ ดูลายมือ ดูดวงแม่นๆ รับคำทำนายลายมือด้วย AI ฟรี ไม่ต้องสมัครสมาชิก — Upload a palm photo for a free AI palm reading.';
 		$url         = home_url( '/palm-teller/' );
+		$image       = get_theme_file_uri( '/assets/images/tarot-share.jpg' );
 		?>
 		<meta name="description" content="<?php echo esc_attr( $description ); ?>">
 		<meta name="keywords" content="ดูลายมือ, อ่านลายมือ, ทำนายลายมือ, ดูดวงแม่นๆ, ดูดวงแม่นแม่น, ดูดวง, ดูไพ่, ทำนายฝัน, ดูลายมือ">
@@ -117,6 +126,13 @@ function gypsy_tarot_seo_head() {
 		<meta property="og:title" content="<?php echo esc_attr( $title ); ?>">
 		<meta property="og:description" content="<?php echo esc_attr( $description ); ?>">
 		<meta property="og:url" content="<?php echo esc_url( $url ); ?>">
+		<meta property="og:image" content="<?php echo esc_url( $image ); ?>">
+		<meta property="og:image:type" content="image/jpeg">
+		<meta property="og:image:width" content="1200">
+		<meta property="og:image:height" content="630">
+		<meta property="og:image:alt" content="Gypsy Tarot reading with The Fool tarot card">
+		<meta name="twitter:card" content="summary_large_image">
+		<meta name="twitter:image" content="<?php echo esc_url( $image ); ?>">
 		<meta property="og:locale" content="th_TH">
 		<?php
 		return;
@@ -128,7 +144,7 @@ function gypsy_tarot_seo_head() {
 	$title       = 'ดูดวงแม่นๆ';
 	$description = 'ดูดวงแม่นๆ ดูไพ่ ทำนายฝัน ดูลายมือ เปิดไพ่ทาโรต์ออนไลน์ฟรี 3 ใบ อดีต ปัจจุบัน อนาคต ถามเรื่องความรัก การงาน การเงิน พร้อมคำทำนายจาก AI ไม่ต้องสมัครสมาชิก — Free online 3-card tarot reading for love, career and money.';
 	$url         = home_url( '/' );
-	$image       = get_theme_file_uri( '/assets/cards/major-00.jpeg' );
+	$image       = get_theme_file_uri( '/assets/images/tarot-share.jpg' );
 	$schema      = array(
 		'@context'   => 'https://schema.org',
 		'@type'      => 'WebSite',
@@ -148,6 +164,10 @@ function gypsy_tarot_seo_head() {
 	<meta property="og:description" content="<?php echo esc_attr( $description ); ?>">
 	<meta property="og:url" content="<?php echo esc_url( $url ); ?>">
 	<meta property="og:image" content="<?php echo esc_url( $image ); ?>">
+	<meta property="og:image:type" content="image/jpeg">
+	<meta property="og:image:width" content="1200">
+	<meta property="og:image:height" content="630">
+	<meta property="og:image:alt" content="Gypsy Tarot reading with The Fool tarot card">
 	<meta property="og:locale" content="th_TH">
 	<meta name="twitter:card" content="summary_large_image">
 	<meta name="twitter:title" content="<?php echo esc_attr( $title ); ?>">
@@ -1002,11 +1022,21 @@ function gypsy_tarot_enqueue_assets() {
 		gypsy_tarot_asset_version( '/style.css' )
 	);
 
+	if ( gypsy_tarot_is_dream_teller() || gypsy_tarot_is_palm_teller() || is_front_page() ) {
+		wp_enqueue_script(
+			'gypsy-tarot-share-result',
+			get_theme_file_uri( '/assets/js/share-result.js' ),
+			array(),
+			gypsy_tarot_asset_version( '/assets/js/share-result.js' ),
+			true
+		);
+	}
+
 	if ( gypsy_tarot_is_dream_teller() ) {
 		wp_enqueue_script(
 			'gypsy-tarot-dream-teller',
 			get_theme_file_uri( '/assets/js/dream-teller.js' ),
-			array(),
+			array( 'gypsy-tarot-share-result' ),
 			gypsy_tarot_asset_version( '/assets/js/dream-teller.js' ),
 			true
 		);
@@ -1023,7 +1053,7 @@ function gypsy_tarot_enqueue_assets() {
 		wp_enqueue_script(
 			'gypsy-tarot-palm-teller',
 			get_theme_file_uri( '/assets/js/palm-teller.js' ),
-			array(),
+			array( 'gypsy-tarot-share-result' ),
 			gypsy_tarot_asset_version( '/assets/js/palm-teller.js' ),
 			true
 		);
@@ -1040,7 +1070,7 @@ function gypsy_tarot_enqueue_assets() {
 		wp_enqueue_script(
 			'gypsy-tarot-app',
 			get_theme_file_uri( '/assets/js/tarot.js' ),
-			array(),
+			array( 'gypsy-tarot-share-result' ),
 			gypsy_tarot_asset_version( '/assets/js/tarot.js' ),
 			true
 		);
