@@ -1,8 +1,8 @@
 /*
-Theme Name: Gypsy Tarot
-Author: Gypsy Tarot
+Theme Name: ดูแม่นๆ (Doomanman.com)
+Author: ดูแม่นๆ (Doomanman.com)
 Description: A bilingual, mobile-friendly tarot reading experience for WordPress.
-Version: 1.5.10
+Version: 1.5.15
 Requires at least: 6.0
 Requires PHP: 7.2
 Text Domain: gypsy-tarot
@@ -460,6 +460,141 @@ a:focus-visible {
 	line-height: 1.8;
 	margin: 14px auto 0;
 	max-width: 600px;
+}
+
+.reading-examples {
+	background:
+		radial-gradient(ellipse at 50% 0, rgb(80 24 132 / 13%), transparent 48%),
+		#0a0712;
+	border-bottom: 1px solid var(--line);
+	padding: 66px 24px 72px;
+}
+
+.examples-inner {
+	margin: 0 auto;
+	max-width: 1040px;
+}
+
+.examples-heading {
+	margin: 0 auto 34px;
+	text-align: center;
+}
+
+.examples-heading .eyebrow {
+	margin-bottom: 12px;
+}
+
+.examples-heading h2 {
+	color: var(--white);
+	font-family: var(--serif);
+	font-size: clamp(29px, 4vw, 40px);
+	font-weight: 400;
+	margin: 0;
+}
+
+.example-grid {
+	display: grid;
+	gap: 18px;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+}
+
+.example-card {
+	background: linear-gradient(145deg, rgb(36 22 48 / 78%), rgb(17 12 26 / 88%));
+	border: 1px solid rgb(226 185 101 / 23%);
+	border-radius: 4px;
+	min-width: 0;
+	padding: 22px;
+}
+
+.example-card h3 {
+	color: var(--white);
+	font-family: var(--serif);
+	font-size: 20px;
+	font-weight: 400;
+	line-height: 1.45;
+	margin: 0 0 13px;
+}
+
+.example-card p {
+	color: var(--muted);
+	font-size: 14px;
+	line-height: 1.75;
+	margin: 0;
+}
+
+.example-card .example-prompt {
+	color: var(--gold);
+	font-size: 12px;
+	margin-bottom: 9px;
+}
+
+.example-spread-labels {
+	color: var(--gold);
+	display: grid;
+	font-size: 11px;
+	gap: 12px;
+	grid-template-columns: minmax(82px, 1fr) minmax(0, 3fr);
+	margin: 0 22px 8px;
+}
+
+.example-card .example-numbers {
+	border-top: 1px solid var(--line);
+	color: #cfc2d9;
+	font-size: 12px;
+	margin-top: 16px;
+	padding-top: 12px;
+}
+
+.example-numbers strong {
+	color: var(--gold);
+	letter-spacing: .08em;
+}
+
+.sample-spread {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.sample-spread li {
+	border-top: 1px solid var(--line);
+	display: grid;
+	gap: 3px 12px;
+	grid-template-columns: minmax(82px, 1fr) minmax(0, 3fr);
+	padding: 12px 0;
+}
+
+.sample-spread li > span {
+	color: var(--gold);
+	font-size: 11px;
+	grid-row: span 1;
+	padding-top: 2px;
+}
+
+.sample-spread li > div {
+	min-width: 0;
+}
+
+.sample-spread li strong {
+	color: #f0e8fa;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.5;
+}
+
+.example-card .sample-spread li p {
+	font-size: 12px;
+	line-height: 1.65;
+}
+
+@media (max-width: 600px) {
+	.reading-examples {
+		padding: 48px 18px 54px;
+	}
+
+	.example-card {
+		padding: 18px;
+	}
 }
 
 .reading-section {
@@ -1630,6 +1765,59 @@ a:focus-visible {
 	font-size: 10px;
 	line-height: 1.7;
 	margin: 0;
+}
+
+.footer-links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 22px;
+	justify-content: center;
+	margin: 16px auto 0;
+}
+
+.footer-links a {
+	color: rgb(253 250 255 / 68%);
+	font-size: 12px;
+	text-decoration-color: rgb(226 185 101 / 42%);
+	text-underline-offset: 4px;
+}
+
+.footer-links a:hover {
+	color: var(--gold);
+}
+
+.info-content {
+	max-width: 760px;
+}
+
+.info-section + .info-section {
+	border-top: 1px solid var(--line);
+	margin-top: 30px;
+	padding-top: 25px;
+}
+
+.info-section h2 {
+	color: var(--white);
+	font-family: var(--serif);
+	font-size: 22px;
+	font-weight: 400;
+	margin: 0 0 10px;
+}
+
+.info-section p {
+	color: var(--muted);
+	font-size: 15px;
+	line-height: 1.8;
+	margin: 0;
+}
+
+.info-section a {
+	color: var(--gold);
+	text-underline-offset: 4px;
+}
+
+.info-section .contact-line {
+	margin-top: 16px;
 }
 
 .site-footer {

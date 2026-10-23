@@ -9,9 +9,9 @@ get_header();
 ?>
 <main id="main-content" class="dream-page palm-page">
 	<section class="dream-hero" aria-labelledby="palm-title">
-		<p class="eyebrow" data-i18n="footerBrand">ห้องแห่งคำพยากรณ์</p>
-		<h1 id="palm-title" data-i18n="palmTitle">ดูลายมือ</h1>
-		<p data-i18n="palmHeroCopy">อัปโหลดรูปฝ่ามือของคุณ แล้วรับคำทำนายลายมือเพื่อทบทวนตัวเอง</p>
+		<p class="eyebrow" data-i18n="footerBrand">ดูแม่นๆ (Doomanman.com)</p>
+		<h1 id="palm-title" data-i18n="palmTitle">ดูลายมือฟรี</h1>
+		<p data-i18n="palmHeroCopy">อัปโหลดรูปฝ่ามือเพื่ออ่านลายมือฟรีด้วย AI ใช้เป็นแนวทางเพื่อความบันเทิงและทบทวนตัวเอง</p>
 	</section>
 
 	<section class="dream-lookup" aria-labelledby="palm-lookup-title">
@@ -64,6 +64,11 @@ get_header();
 			</section>
 			<p class="dream-disclaimer" data-i18n="palmDisclaimer">คำทำนายลายมือเป็นความเชื่อและแนวทางเพื่อความบันเทิง ไม่ใช่คำทำนายที่รับประกันผล และไม่ใช่คำแนะนำทางการแพทย์หรือวิชาชีพ</p>
 		</div>
+	</section>
+	<section class="intro" aria-labelledby="palm-seo-title">
+		<p class="eyebrow" data-i18n="palmSeoEyebrow">ดูลายมือฟรี</p>
+		<h2 id="palm-seo-title" data-i18n="palmSeoTitle">อ่านลายมือจากรูปฝ่ามือของคุณ</h2>
+		<p class="intro-copy" data-i18n="palmSeoCopy">อัปโหลดภาพฝ่ามือที่ชัดเจนเพื่อรับคำอ่านลายมือด้วย AI โดยไม่ต้องสมัครสมาชิก ผลการอ่านเป็นแนวทางเพื่อความบันเทิงและทบทวนตัวเอง ไม่ใช่คำทำนายที่รับประกันผลหรือคำแนะนำจากผู้เชี่ยวชาญ</p>
 	</section>
 </main>
 <?php

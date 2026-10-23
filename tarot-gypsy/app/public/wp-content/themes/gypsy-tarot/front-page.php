@@ -42,6 +42,38 @@ get_header();
 		<p class="intro-copy" data-i18n="introCopy">Pick what’s on your mind, then choose three cards that catch your eye. We’ll read them together as past, present, and future.</p>
 	</section>
 
+	<section class="reading-examples" aria-labelledby="tarot-examples-title">
+		<div class="examples-inner">
+			<div class="examples-heading">
+				<p class="eyebrow" data-i18n="tarotExamplesEyebrow">ตัวอย่างการอ่านไพ่</p>
+				<h2 id="tarot-examples-title" data-i18n="tarotExamplesTitle">ตัวอย่างคำทำนายไพ่ยิปซี 3 ใบ</h2>
+				<p class="intro-copy" data-i18n="tarotExamplesIntro">ตัวอย่างเพื่อประกอบการอ่านเท่านั้น ไพ่เป็นเครื่องมือชวนทบทวน ไม่ได้กำหนดหรือรับประกันอนาคต</p>
+			</div>
+			<div class="example-spread-labels" aria-hidden="true">
+				<span data-i18n="samplePeriod">ช่วงเวลา</span>
+				<span data-i18n="sampleCardMeaning">ไพ่และคำทำนาย</span>
+			</div>
+			<div class="example-grid">
+				<article class="example-card tarot-example">
+					<h3 data-i18n="tarotExampleLoveTitle">ตัวอย่างเรื่องความรัก</h3>
+					<ol class="sample-spread">
+						<li><span data-i18n="past">ที่ผ่านมา</span><div><strong data-i18n="tarotLovePast">The Hermit · ฤๅษี</strong><p data-i18n="tarotLovePastCopy">คุณอาจเคยใช้เวลาอยู่กับตัวเองมากกว่าการมีความสัมพันธ์ ช่วงเวลานี้ช่วยให้คุณเข้าใจความต้องการของตัวเองมากขึ้น</p></div></li>
+						<li><span data-i18n="present">ตอนนี้</span><div><strong data-i18n="tarotLovePresent">Two of Cups · 2 ถ้วย</strong><p data-i18n="tarotLovePresentCopy">ความรักกำลังไปในทิศทางที่ดี การเปิดใจพูดคุย รับฟังกัน และเข้าใจกัน จะช่วยให้ความสัมพันธ์แน่นแฟ้นยิ่งขึ้น</p></div></li>
+						<li><span data-i18n="future">สิ่งที่รออยู่</span><div><strong data-i18n="tarotLoveFuture">The Star · ดวงดาว</strong><p data-i18n="tarotLoveFutureCopy">ความรักยังมีความหวัง มีโอกาสได้พบความสัมพันธ์ที่ดี หรือค่อย ๆ เยียวยาความรู้สึกและสร้างความรักให้มั่นคงขึ้น</p></div></li>
+					</ol>
+				</article>
+				<article class="example-card tarot-example">
+					<h3 data-i18n="tarotExampleCareerTitle">ตัวอย่างเรื่องการงาน</h3>
+					<ol class="sample-spread">
+						<li><span data-i18n="past">ที่ผ่านมา</span><div><strong data-i18n="tarotCareerPast">Eight of Pentacles · 8 เหรียญ</strong><p data-i18n="tarotCareerPastCopy">คุณทุ่มเทกับการทำงานและพัฒนาทักษะของตัวเองมาอย่างต่อเนื่อง สิ่งที่เรียนรู้และฝึกฝนจะเป็นประโยชน์ต่อคุณในระยะยาว</p></div></li>
+						<li><span data-i18n="present">ตอนนี้</span><div><strong data-i18n="tarotCareerPresent">Three of Pentacles · 3 เหรียญ</strong><p data-i18n="tarotCareerPresentCopy">การทำงานร่วมกับผู้อื่นเป็นสิ่งสำคัญ การแลกเปลี่ยนความคิดเห็นและช่วยกันแก้ปัญหาจะทำให้งานเดินหน้าได้ดี</p></div></li>
+						<li><span data-i18n="future">สิ่งที่รออยู่</span><div><strong data-i18n="tarotCareerFuture">Ace of Wands · 1 ไม้เท้า</strong><p data-i18n="tarotCareerFutureCopy">คุณมีโอกาสเริ่มต้นสิ่งใหม่ ๆ ไม่ว่าจะเป็นโปรเจกต์ใหม่ งานใหม่ หรือไอเดียที่น่าสนใจ หากลงมือทำอย่างจริงจัง อาจนำไปสู่โอกาสที่ดีในอนาคต</p></div></li>
+					</ol>
+				</article>
+			</div>
+		</div>
+	</section>
+
 	<section class="reading-section" id="reading" aria-labelledby="reading-title">
 		<div class="reading-inner">
 			<div class="reading-heading">

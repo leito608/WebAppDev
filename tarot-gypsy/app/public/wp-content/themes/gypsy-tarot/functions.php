@@ -23,40 +23,58 @@ function gypsy_tarot_is_palm_teller() {
 	return (bool) get_query_var( 'gypsy_tarot_palm_teller' );
 }
 
+function gypsy_tarot_is_info_page() {
+	return in_array( get_query_var( 'gypsy_tarot_info_page' ), array( 'privacy-policy', 'about-us', 'contact-us' ), true );
+}
+
 function gypsy_tarot_is_oracle_page() {
 	return gypsy_tarot_is_dream_teller() || gypsy_tarot_is_palm_teller();
 }
 
 function gypsy_tarot_document_title( $title ) {
 	if ( gypsy_tarot_is_dream_teller() ) {
-		return 'ดูดวงแม่นๆ — ทำนายฝัน';
+		return 'ทำนายฝัน เลขเด็ด 3 ตัว 2 ตัว | ดูแม่นๆ';
 	}
 	if ( gypsy_tarot_is_palm_teller() ) {
-		return 'ดูดวงแม่นๆ — ดูลายมือ';
+		return 'ดูลายมือฟรี อ่านลายมือจากรูปฝ่ามือ | ดูแม่นๆ';
+	}
+	if ( gypsy_tarot_is_info_page() ) {
+		$titles = array(
+			'privacy-policy' => 'นโยบายความเป็นส่วนตัว',
+			'about-us'       => 'เกี่ยวกับเรา',
+			'contact-us'     => 'ติดต่อเรา',
+		);
+		return $titles[ get_query_var( 'gypsy_tarot_info_page' ) ];
 	}
 
-	return is_front_page() ? 'ดูดวงแม่นๆ' : $title;
+	return is_front_page() ? 'ดูดวงฟรี ไพ่ยิปซี 3 ใบ | ดูแม่นๆ' : $title;
 }
 add_filter( 'pre_get_document_title', 'gypsy_tarot_document_title' );
 
 function gypsy_tarot_register_dream_teller_route() {
 	add_rewrite_rule( '^dream-teller/?$', 'index.php?gypsy_tarot_dream_teller=1', 'top' );
 	add_rewrite_rule( '^palm-teller/?$', 'index.php?gypsy_tarot_palm_teller=1', 'top' );
+	add_rewrite_rule( '^(privacy-policy|about-us|contact-us)/?$', 'index.php?gypsy_tarot_info_page=$matches[1]', 'top' );
 }
 add_action( 'init', 'gypsy_tarot_register_dream_teller_route' );
 
 function gypsy_tarot_dream_teller_query_var( $query_vars ) {
 	$query_vars[] = 'gypsy_tarot_dream_teller';
 	$query_vars[] = 'gypsy_tarot_palm_teller';
+	$query_vars[] = 'gypsy_tarot_info_page';
 	return $query_vars;
 }
 add_filter( 'query_vars', 'gypsy_tarot_dream_teller_query_var' );
 
 function gypsy_tarot_refresh_dream_teller_route() {
-	$route_version = '3';
+	$route_version = '4';
 	$rules         = get_option( 'rewrite_rules' );
 	// Also flush when the stored rules lack our route (e.g. a database copied from another site).
-	$missing_rule  = is_array( $rules ) && ( ! isset( $rules['^dream-teller/?$'] ) || ! isset( $rules['^palm-teller/?$'] ) );
+	$missing_rule  = is_array( $rules ) && (
+		! isset( $rules['^dream-teller/?$'] )
+		|| ! isset( $rules['^palm-teller/?$'] )
+		|| ! isset( $rules['^(privacy-policy|about-us|contact-us)/?$'] )
+	);
 	if ( $missing_rule || get_option( 'gypsy_tarot_dream_route_version' ) !== $route_version ) {
 		flush_rewrite_rules( false );
 		update_option( 'gypsy_tarot_dream_route_version', $route_version );
@@ -70,6 +88,9 @@ function gypsy_tarot_dream_teller_template( $template ) {
 	}
 	if ( gypsy_tarot_is_palm_teller() ) {
 		return get_theme_file_path( '/page-palm-teller.php' );
+	}
+	if ( gypsy_tarot_is_info_page() ) {
+		return get_theme_file_path( '/page-info.php' );
 	}
 
 	return $template;
@@ -87,16 +108,29 @@ remove_action( 'wp_head', 'wp_site_icon', 99 );
 
 function gypsy_tarot_seo_head() {
 	if ( gypsy_tarot_is_dream_teller() ) {
-		$title       = 'ดูดวงแม่นๆ — ทำนายฝัน';
-		$description = 'ค้นหาความหมายของความฝันจากคลังคำทำนายภาษาไทย พร้อมมุมมองชวนทบทวนใจ ใช้งานฟรี ไม่ต้องสมัครสมาชิก ดูดวงแม่นๆ ดูดวง ดูไพ่ ดูลายมือ';
+		$title       = 'ทำนายฝัน เลขเด็ด 3 ตัว 2 ตัว | ดูแม่นๆ';
+		$description = 'ทำนายฝันฟรี อ่านความหมายความฝัน พร้อมแนวทางเลขเด็ด 3 ตัวและ 2 ตัวเพื่อความบันเทิง ไม่ต้องสมัครสมาชิก คำทำนายไม่รับประกันผล';
 		$url         = home_url( '/dream-teller/' );
 		$image       = get_theme_file_uri( '/assets/images/tarot-share.jpg' );
+		$schema      = array(
+			'@context'    => 'https://schema.org',
+			'@type'       => 'WebPage',
+			'name'        => $title,
+			'url'         => $url,
+			'description' => $description,
+			'inLanguage'  => 'th',
+			'isPartOf'    => array(
+				'@type' => 'WebSite',
+				'name'  => 'ดูแม่นๆ (Doomanman.com)',
+				'url'   => home_url( '/' ),
+			),
+		);
 		?>
 		<meta name="description" content="<?php echo esc_attr( $description ); ?>">
-		<meta name="keywords" content="ทำนายฝัน, ตีความความฝัน, ดูดวงแม่นๆ, ดูดวงแม่นแม่น, ดูดวง, ดูไพ่, ทำนายฝัน, ดูลายมือ">
 		<meta name="robots" content="index,follow,max-image-preview:large">
 		<link rel="canonical" href="<?php echo esc_url( $url ); ?>">
 		<meta property="og:type" content="website">
+		<meta property="og:site_name" content="ดูแม่นๆ (Doomanman.com)">
 		<meta property="og:title" content="<?php echo esc_attr( $title ); ?>">
 		<meta property="og:description" content="<?php echo esc_attr( $description ); ?>">
 		<meta property="og:url" content="<?php echo esc_url( $url ); ?>">
@@ -104,25 +138,41 @@ function gypsy_tarot_seo_head() {
 		<meta property="og:image:type" content="image/jpeg">
 		<meta property="og:image:width" content="1200">
 		<meta property="og:image:height" content="630">
-		<meta property="og:image:alt" content="Gypsy Tarot reading with The Fool tarot card">
-		<meta name="twitter:card" content="summary_large_image">
-		<meta name="twitter:image" content="<?php echo esc_url( $image ); ?>">
+		<meta property="og:image:alt" content="ดูแม่นๆ (Doomanman.com) tarot reading with The Fool tarot card">
 		<meta property="og:locale" content="th_TH">
+		<meta name="twitter:card" content="summary_large_image">
+		<meta name="twitter:title" content="<?php echo esc_attr( $title ); ?>">
+		<meta name="twitter:description" content="<?php echo esc_attr( $description ); ?>">
+		<meta name="twitter:image" content="<?php echo esc_url( $image ); ?>">
+		<script type="application/ld+json"><?php echo wp_json_encode( $schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ); ?></script>
 		<?php
 		return;
 	}
 
 	if ( gypsy_tarot_is_palm_teller() ) {
-		$title       = 'ดูดวงแม่นๆ — ดูลายมือ';
-		$description = 'อัปโหลดรูปฝ่ามือ ดูลายมือ ดูดวงแม่นๆ รับคำทำนายลายมือด้วย AI ฟรี ไม่ต้องสมัครสมาชิก — Upload a palm photo for a free AI palm reading.';
+		$title       = 'ดูลายมือฟรี อ่านลายมือจากรูปฝ่ามือ | ดูแม่นๆ';
+		$description = 'ดูลายมือฟรี เพียงอัปโหลดรูปฝ่ามือเพื่อรับคำอ่านลายมือด้วย AI ใช้ได้โดยไม่ต้องสมัครสมาชิก คำอ่านเพื่อความบันเทิง ไม่ใช่คำแนะนำจากผู้เชี่ยวชาญ';
 		$url         = home_url( '/palm-teller/' );
 		$image       = get_theme_file_uri( '/assets/images/tarot-share.jpg' );
+		$schema      = array(
+			'@context'    => 'https://schema.org',
+			'@type'       => 'WebPage',
+			'name'        => $title,
+			'url'         => $url,
+			'description' => $description,
+			'inLanguage'  => 'th',
+			'isPartOf'    => array(
+				'@type' => 'WebSite',
+				'name'  => 'ดูแม่นๆ (Doomanman.com)',
+				'url'   => home_url( '/' ),
+			),
+		);
 		?>
 		<meta name="description" content="<?php echo esc_attr( $description ); ?>">
-		<meta name="keywords" content="ดูลายมือ, อ่านลายมือ, ทำนายลายมือ, ดูดวงแม่นๆ, ดูดวงแม่นแม่น, ดูดวง, ดูไพ่, ทำนายฝัน, ดูลายมือ">
 		<meta name="robots" content="index,follow,max-image-preview:large">
 		<link rel="canonical" href="<?php echo esc_url( $url ); ?>">
 		<meta property="og:type" content="website">
+		<meta property="og:site_name" content="ดูแม่นๆ (Doomanman.com)">
 		<meta property="og:title" content="<?php echo esc_attr( $title ); ?>">
 		<meta property="og:description" content="<?php echo esc_attr( $description ); ?>">
 		<meta property="og:url" content="<?php echo esc_url( $url ); ?>">
@@ -130,36 +180,58 @@ function gypsy_tarot_seo_head() {
 		<meta property="og:image:type" content="image/jpeg">
 		<meta property="og:image:width" content="1200">
 		<meta property="og:image:height" content="630">
-		<meta property="og:image:alt" content="Gypsy Tarot reading with The Fool tarot card">
-		<meta name="twitter:card" content="summary_large_image">
-		<meta name="twitter:image" content="<?php echo esc_url( $image ); ?>">
+		<meta property="og:image:alt" content="ดูแม่นๆ (Doomanman.com) free palm reading">
 		<meta property="og:locale" content="th_TH">
+		<meta name="twitter:card" content="summary_large_image">
+		<meta name="twitter:title" content="<?php echo esc_attr( $title ); ?>">
+		<meta name="twitter:description" content="<?php echo esc_attr( $description ); ?>">
+		<meta name="twitter:image" content="<?php echo esc_url( $image ); ?>">
+		<script type="application/ld+json"><?php echo wp_json_encode( $schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ); ?></script>
 		<?php
 		return;
 	}
 
-	if ( ! is_front_page() ) {
+	if ( gypsy_tarot_is_info_page() ) {
+		$info_page   = get_query_var( 'gypsy_tarot_info_page' );
+		$titles      = array(
+			'privacy-policy' => 'นโยบายความเป็นส่วนตัว',
+			'about-us'       => 'เกี่ยวกับเรา',
+			'contact-us'     => 'ติดต่อเรา',
+		);
+		$descriptions = array(
+			'privacy-policy' => 'นโยบายความเป็นส่วนตัวของ ดูแม่นๆ (Doomanman.com) และรายละเอียดเกี่ยวกับการประมวลผลข้อมูล',
+			'about-us'       => 'รู้จัก ดูแม่นๆ (Doomanman.com) พื้นที่สำหรับทบทวนตัวเองผ่านไพ่ทาโรต์ ความฝัน และลายมือ',
+			'contact-us'     => 'ติดต่อ ดูแม่นๆ (Doomanman.com) ผ่าน LINE ID maroon608',
+		);
+		?>
+		<meta name="description" content="<?php echo esc_attr( $descriptions[ $info_page ] ); ?>">
+		<meta name="robots" content="index,follow">
+		<link rel="canonical" href="<?php echo esc_url( home_url( '/' . $info_page . '/' ) ); ?>">
+		<?php
 		return;
 	}
-	$title       = 'ดูดวงแม่นๆ';
-	$description = 'ดูดวงแม่นๆ ดูไพ่ ทำนายฝัน ดูลายมือ เปิดไพ่ทาโรต์ออนไลน์ฟรี 3 ใบ อดีต ปัจจุบัน อนาคต ถามเรื่องความรัก การงาน การเงิน พร้อมคำทำนายจาก AI ไม่ต้องสมัครสมาชิก — Free online 3-card tarot reading for love, career and money.';
+
+	if ( ! is_front_page() || gypsy_tarot_is_info_page() ) {
+		return;
+	}
+	$title       = 'ดูดวงฟรี ไพ่ยิปซี 3 ใบ | ดูแม่นๆ';
+	$description = 'ดูดวงฟรีด้วยไพ่ยิปซีออนไลน์ เลือกไพ่ 3 ใบ อ่านแนวทางความรัก การงาน การเงิน พร้อมบริการดูลายมือฟรีและทำนายฝัน ไม่ต้องสมัครสมาชิก เพื่อความบันเทิงและทบทวนตัวเอง';
 	$url         = home_url( '/' );
 	$image       = get_theme_file_uri( '/assets/images/tarot-share.jpg' );
 	$schema      = array(
 		'@context'   => 'https://schema.org',
 		'@type'      => 'WebSite',
-		'name'       => $title,
+		'name'       => 'ดูแม่นๆ (Doomanman.com)',
 		'url'        => $url,
 		'inLanguage' => array( 'th', 'en' ),
 		'description' => $description,
 	);
 	?>
 	<meta name="description" content="<?php echo esc_attr( $description ); ?>">
-	<meta name="keywords" content="ดูดวงแม่นๆ, ดูดวงแม่นแม่น, ดูดวง, ดูไพ่, ทำนายฝัน, ดูลายมือ, ดูดวงไพ่ทาโรต์, เปิดไพ่ยิปซี, ไพ่ทาโรต์ออนไลน์, ดูดวงความรัก, ดูดวงการงาน, tarot reading, free tarot">
 	<meta name="robots" content="index,follow,max-image-preview:large">
 	<link rel="canonical" href="<?php echo esc_url( $url ); ?>">
 	<meta property="og:type" content="website">
-	<meta property="og:site_name" content="<?php echo esc_attr( $title ); ?>">
+	<meta property="og:site_name" content="ดูแม่นๆ (Doomanman.com)">
 	<meta property="og:title" content="<?php echo esc_attr( $title ); ?>">
 	<meta property="og:description" content="<?php echo esc_attr( $description ); ?>">
 	<meta property="og:url" content="<?php echo esc_url( $url ); ?>">
@@ -167,7 +239,7 @@ function gypsy_tarot_seo_head() {
 	<meta property="og:image:type" content="image/jpeg">
 	<meta property="og:image:width" content="1200">
 	<meta property="og:image:height" content="630">
-	<meta property="og:image:alt" content="Gypsy Tarot reading with The Fool tarot card">
+	<meta property="og:image:alt" content="ดูแม่นๆ (Doomanman.com) tarot reading with The Fool tarot card">
 	<meta property="og:locale" content="th_TH">
 	<meta name="twitter:card" content="summary_large_image">
 	<meta name="twitter:title" content="<?php echo esc_attr( $title ); ?>">
@@ -1066,7 +1138,7 @@ function gypsy_tarot_enqueue_assets() {
 				'visitorsUrl' => defined( 'GYPSY_TAROT_API_BASE' ) ? untrailingslashit( GYPSY_TAROT_API_BASE ) . '/visitors' : gypsy_tarot_relative_rest_url( '/gypsy-tarot/v1/visitors' ),
 			)
 		);
-	} elseif ( is_front_page() ) {
+	} elseif ( is_front_page() && ! gypsy_tarot_is_info_page() ) {
 		wp_enqueue_script(
 			'gypsy-tarot-app',
 			get_theme_file_uri( '/assets/js/tarot.js' ),
@@ -1086,6 +1158,16 @@ function gypsy_tarot_enqueue_assets() {
 				'debugEnabled' => gypsy_tarot_is_local_debug(),
 				'groqEndpoint' => gypsy_tarot_is_local_debug() ? 'https://api.groq.com/openai/v1/chat/completions' : '',
 			)
+		);
+	}
+
+	if ( gypsy_tarot_is_info_page() ) {
+		wp_enqueue_script(
+			'gypsy-tarot-info-pages',
+			get_theme_file_uri( '/assets/js/info-pages.js' ),
+			array(),
+			gypsy_tarot_asset_version( '/assets/js/info-pages.js' ),
+			true
 		);
 	}
 }

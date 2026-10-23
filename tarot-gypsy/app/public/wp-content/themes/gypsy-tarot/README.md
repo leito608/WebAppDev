@@ -1,6 +1,6 @@
-# Gypsy Tarot
+# ดูแม่นๆ (Doomanman.com)
 
-A no-account, bilingual tarot-reading experience built as an installable WordPress theme. Its midnight-purple, gold-accented visual identity pairs celestial motifs with prominent animated tarot cards, and includes an interactive three-card past / present / future spread using a standard 78-card tarot deck.
+A no-account, bilingual tarot-reading experience built as an installable WordPress theme. ดูแม่นๆ (Doomanman.com) pairs a midnight-purple, gold-accented visual identity and celestial motifs with an interactive three-card past / present / future spread using a standard 78-card tarot deck.
 
 ## User stories
 
@@ -15,10 +15,11 @@ A no-account, bilingual tarot-reading experience built as an installable WordPre
 9. **As a visitor,** I want the built-in interpretation to remain available if AI is unavailable so I can still complete my reading.
 10. **As a visitor,** I want to describe a dream and receive an interpretation with 3- and 2-digit lottery numbers, in my chosen language (Thai/English).
 11. **As a visitor,** I want to upload a photo of my palm and receive an AI palm reading in my chosen language (Thai/English).
+12. **As a visitor,** I want Thai/English privacy, about, and contact pages so I can understand the service and reach its owner.
 
 ## Install
 
-1. In WordPress, go to **Appearance → Themes** and activate **Gypsy Tarot**.
+1. In WordPress, go to **Appearance → Themes** and activate **ดูแม่นๆ (Doomanman.com)**.
 2. Set this homepage as the site's static front page under **Settings → Reading** if the site does not already use the latest posts as its home page.
 3. Configure the Groq API key and model IDs on the server (see **AI configuration** below).
 4. Open the site and choose **Start your reading**. No payment setup or visitor account is needed.
@@ -34,6 +35,10 @@ The `/dream-teller/` page lets visitors describe a dream and sends it to the Clo
 ## Palm reading
 
 The `/palm-teller/` page lets visitors optionally ask a question and upload a palm photo (JPEG, PNG, or WebP). The browser resizes the image client-side, then sends it to the Cloudflare Worker `/palm` route (Groq vision). The reading covers past, present, and future with age ranges and focuses on the visitor’s question. If `GYPSY_TAROT_API_BASE` is not set, the theme falls back to the WordPress REST route `/gypsy-tarot/v1/palm`, which also uses Groq vision. Configure `GROQ_API_KEY` and a vision-capable `GROQ_PALM_MODEL` (defaults to `qwen/qwen3.8-27b`). Readings are reflective and for entertainment only; they are not medical advice.
+
+## Privacy, about, and contact pages
+
+The `/privacy-policy/`, `/about-us/`, and `/contact-us/` pages share the site's Thai/English language preference. The privacy policy explains that submitted questions, dream descriptions, palm photos, and readings are not saved in a site account or database, while disclosing AI-provider processing, temporary rate-limit identifiers, browser storage, and hosting logs. Contact is available through LINE ID `maroon608`.
 
 ## AI configuration
 
