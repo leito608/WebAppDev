@@ -8,11 +8,13 @@
 			navReading: "อ่านไพ่ทาโรต์",
 			navDream: "ทำนายฝัน",
 			navPalm: "ดูลายมือ",
+			navLekded: "เลขเด็ด",
 			footerBrand: "ดูแม่นๆ (Doomanman.com)",
 			disclaimer: "ลองอ่านไพ่เพื่อทบทวนตัวเอง คำทำนายไม่อาจแทนคำแนะนำจากผู้เชี่ยวชาญได้",
 			footerPrivacy: "นโยบายความเป็นส่วนตัว",
 			footerAbout: "เกี่ยวกับเรา",
 			footerContact: "ติดต่อเรา",
+			lekdedTitle: "เลขเด็ด",
 			infoEyebrow: "ดูแม่นๆ (Doomanman.com)",
 			privacyTitle: "นโยบายความเป็นส่วนตัว",
 			privacyIntro: "เราเคารพความเป็นส่วนตัวของคุณ และไม่เก็บข้อมูลที่คุณส่งมาเพื่ออ่านไพ่ไว้บนเว็บไซต์หลังประมวลผล",
@@ -43,11 +45,13 @@
 			navReading: "Tarot reading",
 			navDream: "Dream teller",
 			navPalm: "Palm teller",
+			navLekded: "Lucky numbers",
 			footerBrand: "ดูแม่นๆ (Doomanman.com)",
 			disclaimer: "A reading is a moment for reflection, not a substitute for professional advice.",
 			footerPrivacy: "Privacy Policy",
 			footerAbout: "About Us",
 			footerContact: "Contact Us",
+			lekdedTitle: "Lucky numbers",
 			infoEyebrow: "ดูแม่นๆ (Doomanman.com)",
 			privacyTitle: "Privacy Policy",
 			privacyIntro: "We respect your privacy and do not retain the information you submit for a reading on this site after processing.",
@@ -93,7 +97,12 @@
 		languageButton.setAttribute("aria-label", language === "en" ? "Switch to Thai" : "Switch to English");
 
 		const titleKey = document.querySelector("#info-title").getAttribute("data-i18n");
-		document.title = translations[language][titleKey] + " — ดูแม่นๆ (Doomanman.com)";
+		if (titleKey === "lekdedTitle") {
+			const topic = document.querySelector(".lekded-topic");
+			document.title = translations[language][titleKey] + (topic ? " " + topic.textContent : "") + " — ดูแม่นๆ (Doomanman.com)";
+		} else {
+			document.title = translations[language][titleKey] + " — ดูแม่นๆ (Doomanman.com)";
+		}
 	}
 
 	languageButton.addEventListener("click", function () {

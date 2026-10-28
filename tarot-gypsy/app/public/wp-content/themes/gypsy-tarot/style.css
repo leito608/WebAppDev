@@ -2,7 +2,7 @@
 Theme Name: ดูแม่นๆ (Doomanman.com)
 Author: ดูแม่นๆ (Doomanman.com)
 Description: A bilingual, mobile-friendly tarot reading experience for WordPress.
-Version: 1.5.16
+Version: 1.5.20
 Requires at least: 6.0
 Requires PHP: 7.2
 Text Domain: gypsy-tarot
@@ -1820,6 +1820,78 @@ a:focus-visible {
 	margin-top: 16px;
 }
 
+.lekded-content h2 {
+	color: var(--white);
+	font-family: var(--serif);
+	font-size: 28px;
+	font-weight: 400;
+	margin: 0;
+	text-align: center;
+}
+
+.lekded-topic {
+	color: var(--gold);
+	font-size: 16px;
+	margin: 8px 0 24px;
+	text-align: center;
+}
+
+.lekded-table-wrap {
+	border: 1px solid var(--line);
+	border-radius: 6px;
+	overflow-x: auto;
+}
+
+.lekded-table {
+	border-collapse: collapse;
+	min-width: 650px;
+	width: 100%;
+}
+
+.lekded-table th,
+.lekded-table td {
+	border-bottom: 1px solid var(--line);
+	padding: 14px 16px;
+	text-align: left;
+}
+
+.lekded-table th {
+	background: rgb(255 255 255 / 4%);
+	color: var(--gold);
+	font-size: 13px;
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.lekded-table td {
+	color: var(--muted);
+	font-size: 14px;
+	line-height: 1.65;
+}
+
+.lekded-table tbody tr:last-child td {
+	border-bottom: 0;
+}
+
+.lekded-table .lekded-number {
+	color: var(--white);
+	font-size: 18px;
+	font-weight: 600;
+}
+
+.lekded-disclaimer,
+.lekded-error {
+	color: var(--muted);
+	font-size: 13px;
+	line-height: 1.7;
+	margin: 18px 0 0;
+	text-align: center;
+}
+
+.lekded-error {
+	color: #f0b5b5;
+}
+
 .site-footer {
 	position: relative;
 }
@@ -1886,8 +1958,9 @@ a:focus-visible {
 	.header-tools {
 		flex: 1 1 100%;
 		flex-shrink: 0;
-		gap: 12px;
-		justify-content: space-between;
+		flex-wrap: wrap;
+		gap: 10px 14px;
+		justify-content: flex-start;
 	}
 
 	.nav-link {
@@ -1895,7 +1968,8 @@ a:focus-visible {
 	}
 
 	.nav-link[data-i18n="navDream"],
-	.nav-link[data-i18n="navPalm"] {
+	.nav-link[data-i18n="navPalm"],
+	.nav-link[data-i18n="navLekded"] {
 		display: inline;
 		white-space: nowrap;
 	}
