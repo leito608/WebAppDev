@@ -1190,6 +1190,10 @@ function gypsy_tarot_adsense_head() {
 		return;
 	}
 	printf(
+		'<meta name="google-adsense-account" content="%s">' . "\n",
+		esc_attr( $client )
+	);
+	printf(
 		'<script async src="%s" crossorigin="anonymous"></script>' . "\n",
 		esc_url( 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' . rawurlencode( $client ) )
 	);
