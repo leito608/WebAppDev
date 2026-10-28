@@ -3,7 +3,7 @@
 
 	const translations = {
 		th: {
-			brandName: "มีเรื่องอะไรในใจ มาเปิดไพ่คุยกัน", visitors: "ผู้เข้าชม", navReading: "อ่านไพ่ทาโรต์", navDream: "ทำนายฝัน", navPalm: "ดูลายมือ",
+			brandName: "มีเรื่องอะไรในใจ มาเปิดไพ่คุยกัน", visitors: "ผู้เข้าชม", navReading: "อ่านไพ่ทาโรต์", navDream: "ทำนายฝัน", navPalm: "ดูลายมือ", navLekded: "เลขเด็ด",
 			footerBrand: "ดูแม่นๆ (Doomanman.com)",
 			footerPrivacy: "นโยบายความเป็นส่วนตัว", footerAbout: "เกี่ยวกับเรา", footerContact: "ติดต่อเรา",
 			disclaimer: "ลองอ่านไพ่เพื่อทบทวนตัวเอง คำทำนายไม่อาจแทนคำแนะนำจากผู้เชี่ยวชาญได้",
@@ -34,7 +34,7 @@
 			error: "ตอนนี้ยังทำนายฝันไม่ได้ ลองใหม่อีกครั้งในอีกสักครู่"
 		},
 		en: {
-			brandName: "Something on your mind? Let’s talk it over with the cards.", visitors: "No. of visitors", navReading: "Tarot reading", navDream: "Dream teller", navPalm: "Palm teller",
+			brandName: "Something on your mind? Let’s talk it over with the cards.", visitors: "No. of visitors", navReading: "Tarot reading", navDream: "Dream teller", navPalm: "Palm teller", navLekded: "Lucky numbers",
 			footerBrand: "ดูแม่นๆ (Doomanman.com)",
 			footerPrivacy: "Privacy Policy", footerAbout: "About Us", footerContact: "Contact Us",
 			disclaimer: "A reading is a moment for reflection, not a substitute for professional advice.",
@@ -193,35 +193,4 @@
 	});
 
 	setLanguage(language);
-
-	(function loadVisitorCount() {
-		const countElement = document.getElementById("visitor-count");
-		const config = window.gypsyDreamConfig;
-		const counted = (function () {
-			try { return window.localStorage.getItem("gypsyVisitorCounted") === "1"; } catch (error) { return false; }
-		}());
-		function viaRest() {
-			const url = config.visitorsUrl + (config.visitorsUrl.indexOf("?") === -1 ? "?" : "&") + "t=" + Date.now();
-			return fetch(url, { method: counted ? "GET" : "POST", credentials: "omit", cache: "no-store" }).then(function (response) {
-				if (!response.ok) { throw new Error("Visitor counter HTTP " + response.status); }
-				return response.json();
-			});
-		}
-		function viaAjax() {
-			return fetch(config.ajaxUrl, {
-				method: "POST",
-				headers: { "Content-Type": "application/x-www-form-urlencoded" },
-				body: "action=gypsy_tarot_visitors&increment=" + (counted ? "0" : "1"),
-				cache: "no-store"
-			}).then(function (response) {
-				if (!response.ok) { throw new Error("Visitor counter ajax HTTP " + response.status); }
-				return response.json();
-			});
-		}
-		viaRest().catch(function () { return viaAjax(); }).then(function (data) {
-			if (!data || typeof data.count !== "number") { throw new Error("Visitor counter bad response"); }
-			countElement.textContent = data.count.toLocaleString();
-			try { window.localStorage.setItem("gypsyVisitorCounted", "1"); } catch (error) {}
-		}).catch(function (error) { console.warn(error); });
-	}());
 }());

@@ -16,6 +16,7 @@ A no-account, bilingual tarot-reading experience built as an installable WordPre
 10. **As a visitor,** I want to describe a dream and receive an interpretation with 3- and 2-digit lottery numbers, in my chosen language (Thai/English).
 11. **As a visitor,** I want to upload a photo of my palm and receive an AI palm reading in my chosen language (Thai/English).
 12. **As a visitor,** I want Thai/English privacy, about, and contact pages so I can understand the service and reach its owner.
+13. **As a visitor,** I want to view the latest manually maintained lucky-number scores and their explanations in a table.
 
 ## Install
 
@@ -35,6 +36,22 @@ The `/dream-teller/` page lets visitors describe a dream and sends it to the Clo
 ## Palm reading
 
 The `/palm-teller/` page lets visitors optionally ask a question and upload a palm photo (JPEG, PNG, or WebP). The browser resizes the image client-side, then sends it to the Cloudflare Worker `/palm` route (Groq vision). The reading covers past, present, and future with age ranges and focuses on the visitor’s question. If `GYPSY_TAROT_API_BASE` is not set, the theme falls back to the WordPress REST route `/gypsy-tarot/v1/palm`, which also uses Groq vision. Configure `GROQ_API_KEY` and a vision-capable `GROQ_PALM_MODEL` (defaults to `qwen/qwen3.8-27b`). Readings are reflective and for entertainment only; they are not medical advice.
+
+## Lucky numbers
+
+The `/lekded/` page reads its topic and up to five table rows from `lekded.txt` in the theme directory. To update the page, edit that text file using this format:
+
+```text
+topic: งวด 1 พฤศจิกายน 2569
+อันดับ|ตัวเลข|คะแนนรวม|รายละเอียดที่มาของคะแนน
+1|40|300|รายละเอียดคะแนน
+```
+
+Add up to five data rows after the header. The table is informational and does not guarantee lottery results.
+
+## Visitor counter
+
+The shared header loads the visitor count from the configured `/visitors` API on every theme page. A browser is counted once using `localStorage`; the API count is displayed when it responds, with the WordPress AJAX counter as a fallback.
 
 ## Privacy, about, and contact pages
 

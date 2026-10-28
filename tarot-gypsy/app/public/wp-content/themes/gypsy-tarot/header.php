@@ -19,6 +19,7 @@
 		<a class="nav-link" href="<?php echo esc_url( $is_home_reading_page ? '#reading' : home_url( '/#reading' ) ); ?>" data-i18n="navReading"><?php echo esc_html( $is_home_reading_page ? 'Your reading' : 'อ่านไพ่ทาโรต์' ); ?></a>
 		<a class="nav-link" href="<?php echo esc_url( home_url( '/dream-teller/' ) ); ?>" data-i18n="navDream">ทำนายฝัน</a>
 		<a class="nav-link" href="<?php echo esc_url( home_url( '/palm-teller/' ) ); ?>" data-i18n="navPalm">ดูลายมือ</a>
+		<a class="nav-link" href="<?php echo esc_url( home_url( '/lekded/' ) ); ?>" data-i18n="navLekded">เลขเด็ด</a>
 		<button class="language-switch" type="button" id="language-toggle" aria-label="Switch language">ภาษาไทย</button>
 	</div>
 </header>

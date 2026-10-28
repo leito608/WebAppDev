@@ -23,6 +23,10 @@ function gypsy_tarot_is_palm_teller() {
 	return (bool) get_query_var( 'gypsy_tarot_palm_teller' );
 }
 
+function gypsy_tarot_is_lekded_page() {
+	return (bool) get_query_var( 'gypsy_tarot_lekded_page' );
+}
+
 function gypsy_tarot_is_info_page() {
 	return in_array( get_query_var( 'gypsy_tarot_info_page' ), array( 'privacy-policy', 'about-us', 'contact-us' ), true );
 }
@@ -37,6 +41,13 @@ function gypsy_tarot_document_title( $title ) {
 	}
 	if ( gypsy_tarot_is_palm_teller() ) {
 		return 'ดูลายมือฟรี อ่านลายมือจากรูปฝ่ามือ | ดูแม่นๆ';
+	}
+	if ( gypsy_tarot_is_lekded_page() ) {
+		$lekded_data = gypsy_tarot_get_lekded_data();
+		if ( ! is_wp_error( $lekded_data ) ) {
+			return 'เลขเด็ด ' . $lekded_data['topic'] . ' | ดูแม่นๆ';
+		}
+		return 'เลขเด็ด | ดูแม่นๆ';
 	}
 	if ( gypsy_tarot_is_info_page() ) {
 		$titles = array(
@@ -54,6 +65,7 @@ add_filter( 'pre_get_document_title', 'gypsy_tarot_document_title' );
 function gypsy_tarot_register_dream_teller_route() {
 	add_rewrite_rule( '^dream-teller/?$', 'index.php?gypsy_tarot_dream_teller=1', 'top' );
 	add_rewrite_rule( '^palm-teller/?$', 'index.php?gypsy_tarot_palm_teller=1', 'top' );
+	add_rewrite_rule( '^lekded/?$', 'index.php?gypsy_tarot_lekded_page=1', 'top' );
 	add_rewrite_rule( '^(privacy-policy|about-us|contact-us)/?$', 'index.php?gypsy_tarot_info_page=$matches[1]', 'top' );
 }
 add_action( 'init', 'gypsy_tarot_register_dream_teller_route' );
@@ -61,18 +73,20 @@ add_action( 'init', 'gypsy_tarot_register_dream_teller_route' );
 function gypsy_tarot_dream_teller_query_var( $query_vars ) {
 	$query_vars[] = 'gypsy_tarot_dream_teller';
 	$query_vars[] = 'gypsy_tarot_palm_teller';
+	$query_vars[] = 'gypsy_tarot_lekded_page';
 	$query_vars[] = 'gypsy_tarot_info_page';
 	return $query_vars;
 }
 add_filter( 'query_vars', 'gypsy_tarot_dream_teller_query_var' );
 
 function gypsy_tarot_refresh_dream_teller_route() {
-	$route_version = '4';
+	$route_version = '5';
 	$rules         = get_option( 'rewrite_rules' );
 	// Also flush when the stored rules lack our route (e.g. a database copied from another site).
 	$missing_rule  = is_array( $rules ) && (
 		! isset( $rules['^dream-teller/?$'] )
 		|| ! isset( $rules['^palm-teller/?$'] )
+		|| ! isset( $rules['^lekded/?$'] )
 		|| ! isset( $rules['^(privacy-policy|about-us|contact-us)/?$'] )
 	);
 	if ( $missing_rule || get_option( 'gypsy_tarot_dream_route_version' ) !== $route_version ) {
@@ -82,12 +96,71 @@ function gypsy_tarot_refresh_dream_teller_route() {
 }
 add_action( 'init', 'gypsy_tarot_refresh_dream_teller_route', 20 );
 
+function gypsy_tarot_get_lekded_data() {
+	$path    = get_theme_file_path( '/lekded.txt' );
+	if ( ! is_readable( $path ) ) {
+		error_log( 'Gypsy Tarot could not read lekded.txt.' );
+		return new WP_Error( 'gypsy_tarot_lekded_unavailable', 'เลขเด็ดยังไม่พร้อมใช้งานในขณะนี้' );
+	}
+	$content = file_get_contents( $path );
+	if ( false === $content ) {
+		error_log( 'Gypsy Tarot could not read lekded.txt.' );
+		return new WP_Error( 'gypsy_tarot_lekded_unavailable', 'เลขเด็ดยังไม่พร้อมใช้งานในขณะนี้' );
+	}
+
+	if ( 0 === strpos( $content, "\xEF\xBB\xBF" ) ) {
+		$content = substr( $content, 3 );
+	}
+	$lines = preg_split( '/\r\n|\r|\n/', trim( $content ) );
+	if ( empty( $lines ) || ! preg_match( '/^topic:\s*(.+)$/u', trim( $lines[0] ), $topic_match ) ) {
+		error_log( 'Gypsy Tarot found an invalid topic in lekded.txt.' );
+		return new WP_Error( 'gypsy_tarot_lekded_invalid', 'ข้อมูลเลขเด็ดมีรูปแบบไม่ถูกต้อง' );
+	}
+
+	$rows = array();
+	foreach ( array_slice( $lines, 1 ) as $line ) {
+		$line = trim( $line );
+		if ( '' === $line || 0 === strpos( $line, 'อันดับ|' ) ) {
+			continue;
+		}
+
+		$columns = array_map( 'trim', explode( '|', $line ) );
+		if ( 4 !== count( $columns )
+			|| ! ctype_digit( $columns[0] )
+			|| ! ctype_digit( $columns[1] )
+			|| ! ctype_digit( $columns[2] )
+			|| '' === $columns[3]
+		) {
+			error_log( 'Gypsy Tarot found an invalid row in lekded.txt.' );
+			return new WP_Error( 'gypsy_tarot_lekded_invalid', 'ข้อมูลเลขเด็ดมีรูปแบบไม่ถูกต้อง' );
+		}
+
+		$rows[] = $columns;
+		if ( 5 === count( $rows ) ) {
+			break;
+		}
+	}
+
+	if ( empty( $rows ) ) {
+		error_log( 'Gypsy Tarot found no number rows in lekded.txt.' );
+		return new WP_Error( 'gypsy_tarot_lekded_empty', 'ยังไม่มีข้อมูลเลขเด็ด' );
+	}
+
+	return array(
+		'topic' => trim( $topic_match[1] ),
+		'rows'  => $rows,
+	);
+}
+
 function gypsy_tarot_dream_teller_template( $template ) {
 	if ( gypsy_tarot_is_dream_teller() ) {
 		return get_theme_file_path( '/page-dream-teller.php' );
 	}
 	if ( gypsy_tarot_is_palm_teller() ) {
 		return get_theme_file_path( '/page-palm-teller.php' );
+	}
+	if ( gypsy_tarot_is_lekded_page() ) {
+		return get_theme_file_path( '/page-lekded.php' );
 	}
 	if ( gypsy_tarot_is_info_page() ) {
 		return get_theme_file_path( '/page-info.php' );
@@ -187,6 +260,20 @@ function gypsy_tarot_seo_head() {
 		<meta name="twitter:description" content="<?php echo esc_attr( $description ); ?>">
 		<meta name="twitter:image" content="<?php echo esc_url( $image ); ?>">
 		<script type="application/ld+json"><?php echo wp_json_encode( $schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ); ?></script>
+		<?php
+		return;
+	}
+
+	if ( gypsy_tarot_is_lekded_page() ) {
+		$lekded_data  = gypsy_tarot_get_lekded_data();
+		$topic        = is_wp_error( $lekded_data ) ? '' : $lekded_data['topic'];
+		$title        = 'เลขเด็ด ' . $topic . ' | ดูแม่นๆ';
+		$description  = 'รวมตัวเลขพร้อมคะแนนและรายละเอียดที่มาของคะแนน' . ( '' !== $topic ? ' สำหรับ' . $topic : '' ) . ' เพื่อประกอบความบันเทิงเท่านั้น ไม่ใช่การรับประกันผล';
+		$url         = home_url( '/lekded/' );
+		?>
+		<meta name="description" content="<?php echo esc_attr( $description ); ?>">
+		<meta name="robots" content="index,follow">
+		<link rel="canonical" href="<?php echo esc_url( $url ); ?>">
 		<?php
 		return;
 	}
@@ -1085,13 +1172,27 @@ function gypsy_tarot_asset_version( $relative_path ) {
 }
 
 function gypsy_tarot_enqueue_assets() {
-	$theme = wp_get_theme();
-
 	wp_enqueue_style(
 		'gypsy-tarot-style',
 		get_stylesheet_uri(),
 		array(),
 		gypsy_tarot_asset_version( '/style.css' )
+	);
+
+	wp_enqueue_script(
+		'gypsy-tarot-visitor-counter',
+		get_theme_file_uri( '/assets/js/visitor-counter.js' ),
+		array(),
+		gypsy_tarot_asset_version( '/assets/js/visitor-counter.js' ),
+		true
+	);
+	wp_localize_script(
+		'gypsy-tarot-visitor-counter',
+		'gypsyVisitorConfig',
+		array(
+			'visitorsUrl' => defined( 'GYPSY_TAROT_API_BASE' ) ? untrailingslashit( GYPSY_TAROT_API_BASE ) . '/visitors' : gypsy_tarot_relative_rest_url( '/gypsy-tarot/v1/visitors' ),
+			'ajaxUrl'     => wp_make_link_relative( admin_url( 'admin-ajax.php' ) ),
+		)
 	);
 
 	if ( gypsy_tarot_is_dream_teller() || gypsy_tarot_is_palm_teller() || is_front_page() ) {
@@ -1116,9 +1217,8 @@ function gypsy_tarot_enqueue_assets() {
 			'gypsy-tarot-dream-teller',
 			'gypsyDreamConfig',
 			array(
-				'restUrl'     => defined( 'GYPSY_TAROT_API_BASE' ) ? untrailingslashit( GYPSY_TAROT_API_BASE ) . '/dream' : gypsy_tarot_relative_rest_url( '/gypsy-tarot/v1/dream' ),
-				'ajaxUrl'     => wp_make_link_relative( admin_url( 'admin-ajax.php' ) ),
-				'visitorsUrl' => defined( 'GYPSY_TAROT_API_BASE' ) ? untrailingslashit( GYPSY_TAROT_API_BASE ) . '/visitors' : gypsy_tarot_relative_rest_url( '/gypsy-tarot/v1/visitors' ),
+				'restUrl' => defined( 'GYPSY_TAROT_API_BASE' ) ? untrailingslashit( GYPSY_TAROT_API_BASE ) . '/dream' : gypsy_tarot_relative_rest_url( '/gypsy-tarot/v1/dream' ),
+				'ajaxUrl' => wp_make_link_relative( admin_url( 'admin-ajax.php' ) ),
 			)
 		);
 	} elseif ( gypsy_tarot_is_palm_teller() ) {
@@ -1133,12 +1233,11 @@ function gypsy_tarot_enqueue_assets() {
 			'gypsy-tarot-palm-teller',
 			'gypsyPalmConfig',
 			array(
-				'restUrl'     => defined( 'GYPSY_TAROT_API_BASE' ) ? untrailingslashit( GYPSY_TAROT_API_BASE ) . '/palm' : gypsy_tarot_relative_rest_url( '/gypsy-tarot/v1/palm' ),
-				'ajaxUrl'     => wp_make_link_relative( admin_url( 'admin-ajax.php' ) ),
-				'visitorsUrl' => defined( 'GYPSY_TAROT_API_BASE' ) ? untrailingslashit( GYPSY_TAROT_API_BASE ) . '/visitors' : gypsy_tarot_relative_rest_url( '/gypsy-tarot/v1/visitors' ),
+				'restUrl' => defined( 'GYPSY_TAROT_API_BASE' ) ? untrailingslashit( GYPSY_TAROT_API_BASE ) . '/palm' : gypsy_tarot_relative_rest_url( '/gypsy-tarot/v1/palm' ),
+				'ajaxUrl' => wp_make_link_relative( admin_url( 'admin-ajax.php' ) ),
 			)
 		);
-	} elseif ( is_front_page() && ! gypsy_tarot_is_info_page() ) {
+	} elseif ( is_front_page() && ! gypsy_tarot_is_info_page() && ! gypsy_tarot_is_lekded_page() ) {
 		wp_enqueue_script(
 			'gypsy-tarot-app',
 			get_theme_file_uri( '/assets/js/tarot.js' ),
@@ -1154,14 +1253,13 @@ function gypsy_tarot_enqueue_assets() {
 				'cardBaseUrl'  => trailingslashit( get_theme_file_uri( '/assets/cards/' ) ),
 				'restUrl'      => defined( 'GYPSY_TAROT_API_BASE' ) ? untrailingslashit( GYPSY_TAROT_API_BASE ) . '/reading' : gypsy_tarot_relative_rest_url( '/gypsy-tarot/v1/reading' ),
 				'ajaxUrl'      => wp_make_link_relative( admin_url( 'admin-ajax.php' ) ),
-				'visitorsUrl'  => defined( 'GYPSY_TAROT_API_BASE' ) ? untrailingslashit( GYPSY_TAROT_API_BASE ) . '/visitors' : gypsy_tarot_relative_rest_url( '/gypsy-tarot/v1/visitors' ),
 				'debugEnabled' => gypsy_tarot_is_local_debug(),
 				'groqEndpoint' => gypsy_tarot_is_local_debug() ? 'https://api.groq.com/openai/v1/chat/completions' : '',
 			)
 		);
 	}
 
-	if ( gypsy_tarot_is_info_page() ) {
+	if ( gypsy_tarot_is_info_page() || gypsy_tarot_is_lekded_page() ) {
 		wp_enqueue_script(
 			'gypsy-tarot-info-pages',
 			get_theme_file_uri( '/assets/js/info-pages.js' ),

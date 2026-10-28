@@ -99,7 +99,7 @@
 	const translations = {
 		en: {
 			visitors: "No. of visitors",
-			navReading: "Your reading", navDream: "Dream teller", navPalm: "Palm teller", dreamLink: "Dream teller", palmLink: "Palm teller", heroEyebrow: "A little guidance, when you need it",
+			navReading: "Your reading", navDream: "Dream teller", navPalm: "Palm teller", navLekded: "Lucky numbers", dreamLink: "Dream teller", palmLink: "Palm teller", lekdedLink: "Lucky numbers", heroEyebrow: "A little guidance, when you need it",
 			brandName: "Something on your mind? Let’s talk it over with the cards.", heroLineOne: "Something on your mind? Let’s talk it over with the cards.", heroLineTwo: "",
 			heroCopy: "Take a breath. Think about what’s on your mind, and we’ll turn to the cards together.",
 			startReading: "Let’s read the cards", heroNote: "A moment for yourself · No account needed",
@@ -165,7 +165,7 @@
 		},
 		th: {
 			visitors: "จำนวนผู้เข้าชม",
-			navReading: "คำทำนายของคุณ", navDream: "ทำนายฝัน", navPalm: "ดูลายมือ", dreamLink: "ทำนายฝัน", palmLink: "ดูลายมือ", heroEyebrow: "ถ้ากำลังหาคำแนะนำ ลองเริ่มจากตรงนี้",
+			navReading: "คำทำนายของคุณ", navDream: "ทำนายฝัน", navPalm: "ดูลายมือ", navLekded: "เลขเด็ด", dreamLink: "ทำนายฝัน", palmLink: "ดูลายมือ", lekdedLink: "เลขเด็ด", heroEyebrow: "ถ้ากำลังหาคำแนะนำ ลองเริ่มจากตรงนี้",
 			brandName: "มีเรื่องอะไรในใจ มาเปิดไพ่คุยกัน", heroLineOne: "มีเรื่องอะไรในใจ มาเปิดไพ่คุยกัน", heroLineTwo: "",
 			heroCopy: "พักใจสักครู่ ลองนึกถึงเรื่องที่กำลังคิด แล้วมาเปิดไพ่ไปด้วยกัน",
 			startReading: "มาเปิดไพ่กัน", heroNote: "ช่วงเวลาสำหรับคุณ · ไม่ต้องสมัครสมาชิก",
@@ -863,40 +863,4 @@
 	});
 
 	setLanguage(language);
-
-	(function loadVisitorCount() {
-		const countElement = document.getElementById("visitor-count");
-		const counted = (function () {
-			try { return window.localStorage.getItem("gypsyVisitorCounted") === "1"; } catch (error) { return false; }
-		}());
-		const configRef = window.gypsyTarotConfig;
-		function show(data) {
-			if (!data || typeof data.count !== "number") { throw new Error("Visitor counter bad response"); }
-			countElement.textContent = data.count.toLocaleString();
-			try { window.localStorage.setItem("gypsyVisitorCounted", "1"); } catch (error) {}
-		}
-		function viaRest() {
-			const base = configRef.visitorsUrl;
-			const url = base + (base.indexOf("?") === -1 ? "?" : "&") + "t=" + Date.now();
-			return fetch(url, { method: counted ? "GET" : "POST", credentials: "omit", cache: "no-store" }).then(function (response) {
-				if (!response.ok) { throw new Error("Visitor counter HTTP " + response.status); }
-				return response.json();
-			});
-		}
-		function viaAjax() {
-			return fetch(configRef.ajaxUrl, {
-				method: "POST",
-				headers: { "Content-Type": "application/x-www-form-urlencoded" },
-				body: "action=gypsy_tarot_visitors&increment=" + (counted ? "0" : "1"),
-				cache: "no-store"
-			}).then(function (response) {
-				if (!response.ok) { throw new Error("Visitor counter ajax HTTP " + response.status); }
-				return response.json();
-			});
-		}
-		viaRest().catch(function (error) {
-			console.warn(error);
-			return viaAjax();
-		}).then(show).catch(function (error) { console.warn(error); });
-	}());
 }());

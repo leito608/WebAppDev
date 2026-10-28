@@ -6,6 +6,7 @@
 		<a href="<?php echo esc_url( home_url( '/privacy-policy/' ) ); ?>" data-i18n="footerPrivacy">นโยบายความเป็นส่วนตัว</a>
 		<a href="<?php echo esc_url( home_url( '/about-us/' ) ); ?>" data-i18n="footerAbout">เกี่ยวกับเรา</a>
 		<a href="<?php echo esc_url( home_url( '/contact-us/' ) ); ?>" data-i18n="footerContact">ติดต่อเรา</a>
+		<a href="<?php echo esc_url( home_url( '/lekded/' ) ); ?>" data-i18n="navLekded">เลขเด็ด</a>
 	</nav>
 	<span class="site-version">v<?php echo esc_html( wp_get_theme()->get( 'Version' ) ); ?></span>
 </footer>
