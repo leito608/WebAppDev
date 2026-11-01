@@ -2,7 +2,7 @@
 Theme Name: ดูแม่นๆ (Doomanman.com)
 Author: ดูแม่นๆ (Doomanman.com)
 Description: A bilingual, mobile-friendly tarot reading experience for WordPress.
-Version: 1.5.20
+Version: 1.5.23
 Requires at least: 6.0
 Requires PHP: 7.2
 Text Domain: gypsy-tarot
@@ -1969,7 +1969,8 @@ a:focus-visible {
 
 	.nav-link[data-i18n="navDream"],
 	.nav-link[data-i18n="navPalm"],
-	.nav-link[data-i18n="navLekded"] {
+	.nav-link[data-i18n="navLekded"],
+	.nav-link-lib {
 		display: inline;
 		white-space: nowrap;
 	}
@@ -2232,5 +2233,190 @@ a:focus-visible {
 
 	.visitor-counter {
 		font-size: 12px;
+	}
+}
+
+/* Tarot library, guides, legal pages */
+.lib-content {
+	max-width: 900px;
+}
+
+.lib-breadcrumb {
+	color: var(--muted);
+	font-size: 13px;
+	margin-bottom: 22px;
+}
+
+
+.lib-breadcrumb a,
+.lib-lead a,
+.lib-note a,
+.lib-byline a,
+.lib-link-list a,
+.lib-cta a {
+	color: var(--gold);
+	text-underline-offset: 4px;
+}
+
+.lib-lead,
+.lib-byline,
+.lib-note {
+	color: var(--muted);
+	font-size: 15px;
+	line-height: 1.8;
+}
+
+.lib-byline {
+	font-size: 13px;
+	margin: 0 0 26px;
+}
+
+.lib-note {
+	font-size: 13px;
+	margin-top: 10px;
+}
+
+.lib-group-title {
+	color: var(--white);
+	font-family: var(--serif);
+	font-size: 22px;
+	font-weight: 400;
+	margin: 38px 0 16px;
+}
+
+.lib-card-grid,
+.lib-guide-list,
+.lib-link-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.lib-card-grid {
+	display: grid;
+	gap: 14px;
+	grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+}
+
+.lib-card-grid a {
+	align-items: center;
+	color: var(--ink);
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	text-align: center;
+	text-decoration: none;
+}
+
+.lib-card-grid img,
+.lib-card-figure img {
+	border-radius: 8px;
+	height: auto;
+	max-width: 100%;
+}
+
+.lib-card-name {
+	font-size: 12px;
+	line-height: 1.35;
+}
+
+.lib-card-th {
+	color: var(--muted);
+	font-size: 11px;
+}
+
+.lib-card-layout {
+	align-items: start;
+	display: grid;
+	gap: 28px;
+	grid-template-columns: 220px 1fr;
+	margin-bottom: 30px;
+}
+
+.lib-card-figure {
+	margin: 0;
+}
+
+.lib-page .info-section + .info-section,
+.lib-card-layout .info-section + .info-section {
+	border-top: 1px solid var(--line);
+	margin-top: 26px;
+	padding-top: 22px;
+}
+
+.lib-page .info-section {
+	margin-top: 26px;
+}
+
+.lib-card-layout .info-section {
+	margin-top: 0;
+}
+
+.lib-card-layout .info-section + .info-section {
+	margin-top: 22px;
+}
+
+.lib-guide-list li {
+	border-top: 1px solid var(--line);
+	padding: 20px 0;
+}
+
+.lib-guide-list h2 {
+	font-family: var(--serif);
+	font-size: 20px;
+	font-weight: 400;
+	margin: 0 0 8px;
+}
+
+.lib-guide-list a {
+	color: var(--white);
+	text-decoration: none;
+}
+
+.lib-guide-list a:hover {
+	color: var(--gold);
+}
+
+.lib-guide-list p {
+	color: var(--muted);
+	font-size: 14px;
+	line-height: 1.7;
+	margin: 0;
+}
+
+.lib-link-list li {
+	font-size: 14px;
+	line-height: 2;
+}
+
+.lib-page .info-section p + p {
+	margin-top: 12px;
+}
+
+.lib-pager {
+	align-items: center;
+	border-top: 1px solid var(--line);
+	display: flex;
+	flex-wrap: wrap;
+	font-size: 14px;
+	gap: 12px 24px;
+	justify-content: space-between;
+	margin-top: 32px;
+	padding-top: 20px;
+}
+
+.lib-pager a {
+	color: var(--gold);
+	text-underline-offset: 4px;
+}
+
+@media (max-width: 640px) {
+	.lib-card-layout {
+		grid-template-columns: 1fr;
+	}
+
+	.lib-card-figure {
+		margin: 0 auto;
+		max-width: 180px;
 	}
 }
