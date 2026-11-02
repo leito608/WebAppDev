@@ -1,6 +1,6 @@
 <?php
 /**
- * Manually maintained lucky-number table.
+ * Manually maintained lucky-number history.
  *
  * @package Gypsy_Tarot
  */
@@ -20,30 +20,29 @@ get_header();
 			<?php if ( is_wp_error( $lekded_data ) ) : ?>
 				<p class="lekded-error" role="alert"><?php echo esc_html( $lekded_data->get_error_message() ); ?></p>
 			<?php else : ?>
-				<h2>Top 5 ตัวเลข</h2>
-				<p class="lekded-topic"><?php echo esc_html( $lekded_data['topic'] ); ?></p>
-				<div class="lekded-table-wrap">
-					<table class="lekded-table">
-						<thead>
-							<tr>
-								<th scope="col">อันดับ</th>
-								<th scope="col">ตัวเลข</th>
-								<th scope="col">คะแนนรวม</th>
-								<th scope="col">รายละเอียดที่มาของคะแนน</th>
-							</tr>
-						</thead>
-						<tbody>
-							<?php foreach ( $lekded_data['rows'] as $row ) : ?>
-								<tr>
-									<td><?php echo esc_html( $row[0] ); ?></td>
-									<td class="lekded-number"><?php echo esc_html( $row[1] ); ?></td>
-									<td><?php echo esc_html( $row[2] ); ?></td>
-									<td><?php echo esc_html( $row[3] ); ?></td>
-								</tr>
-							<?php endforeach; ?>
-						</tbody>
-					</table>
-				</div>
+				<?php foreach ( $lekded_data['draws'] as $draw ) : ?>
+					<section class="lekded-draw">
+						<h2><span data-i18n="lekdedDrawTitle">เลขเด็ดงวดวันที่</span> <?php echo esc_html( $draw['date'] ); ?></h2>
+						<div class="lekded-table-wrap">
+							<table class="lekded-table">
+								<thead>
+									<tr>
+										<th scope="col" data-i18n="lekdedNumber">เลข</th>
+										<th scope="col" data-i18n="lekdedLikelihood">ความเป็นไปได้</th>
+									</tr>
+								</thead>
+								<tbody>
+									<?php foreach ( $draw['rows'] as $row ) : ?>
+										<tr>
+											<td class="lekded-number"><?php echo esc_html( $row['number'] ); ?></td>
+											<td class="lekded-score"><?php echo esc_html( $row['score'] ); ?></td>
+										</tr>
+									<?php endforeach; ?>
+								</tbody>
+							</table>
+						</div>
+					</section>
+				<?php endforeach; ?>
 				<p class="lekded-disclaimer">ข้อมูลนี้จัดทำเพื่อความบันเทิงเท่านั้น ไม่ใช่คำแนะนำหรือการรับประกันผลรางวัล</p>
 			<?php endif; ?>
 		</div>

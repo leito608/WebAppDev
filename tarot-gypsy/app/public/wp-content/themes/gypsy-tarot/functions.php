@@ -45,7 +45,7 @@ function gypsy_tarot_document_title( $title ) {
 	if ( gypsy_tarot_is_lekded_page() ) {
 		$lekded_data = gypsy_tarot_get_lekded_data();
 		if ( ! is_wp_error( $lekded_data ) ) {
-			return 'เลขเด็ด ' . $lekded_data['topic'] . ' | ดูแม่นๆ';
+			return 'เลขเด็ด งวด ' . $lekded_data['latest_date'] . ' | ดูแม่นๆ';
 		}
 		return 'เลขเด็ด | ดูแม่นๆ';
 	}
@@ -97,7 +97,7 @@ function gypsy_tarot_refresh_dream_teller_route() {
 add_action( 'init', 'gypsy_tarot_refresh_dream_teller_route', 20 );
 
 function gypsy_tarot_get_lekded_data() {
-	$path    = get_theme_file_path( '/lekded.txt' );
+	$path = get_theme_file_path( '/lekded.txt' );
 	if ( ! is_readable( $path ) ) {
 		error_log( 'Gypsy Tarot could not read lekded.txt.' );
 		return new WP_Error( 'gypsy_tarot_lekded_unavailable', 'เลขเด็ดยังไม่พร้อมใช้งานในขณะนี้' );
@@ -112,43 +112,53 @@ function gypsy_tarot_get_lekded_data() {
 		$content = substr( $content, 3 );
 	}
 	$lines = preg_split( '/\r\n|\r|\n/', trim( $content ) );
-	if ( empty( $lines ) || ! preg_match( '/^topic:\s*(.+)$/u', trim( $lines[0] ), $topic_match ) ) {
-		error_log( 'Gypsy Tarot found an invalid topic in lekded.txt.' );
-		return new WP_Error( 'gypsy_tarot_lekded_invalid', 'ข้อมูลเลขเด็ดมีรูปแบบไม่ถูกต้อง' );
-	}
 
-	$rows = array();
-	foreach ( array_slice( $lines, 1 ) as $line ) {
+	$draws = array();
+	foreach ( $lines as $line ) {
 		$line = trim( $line );
-		if ( '' === $line || 0 === strpos( $line, 'อันดับ|' ) ) {
+		if ( '' === $line ) {
 			continue;
 		}
 
-		$columns = array_map( 'trim', explode( '|', $line ) );
-		if ( 4 !== count( $columns )
-			|| ! ctype_digit( $columns[0] )
-			|| ! ctype_digit( $columns[1] )
-			|| ! ctype_digit( $columns[2] )
-			|| '' === $columns[3]
+		if ( preg_match( '/^Top 10 candidates for draw on (\d{2})\/(\d{2})\/(\d{4}):$/', $line, $date_match ) ) {
+			if ( ! checkdate( (int) $date_match[2], (int) $date_match[1], (int) $date_match[3] )
+				|| ( ! empty( $draws ) && 10 !== count( $draws[ count( $draws ) - 1 ]['rows'] ) )
+			) {
+				error_log( 'Gypsy Tarot found an invalid draw in lekded.txt.' );
+				return new WP_Error( 'gypsy_tarot_lekded_invalid', 'ข้อมูลเลขเด็ดมีรูปแบบไม่ถูกต้อง' );
+			}
+
+			$draws[] = array(
+				'date' => $date_match[1] . '/' . $date_match[2] . '/' . $date_match[3],
+				'rows' => array(),
+			);
+			continue;
+		}
+
+		if ( empty( $draws )
+			|| ! preg_match( '/^(\d{1,2})\.\s+(\d{2})\s+score\s+(\d+(?:\.\d+)?)%$/', $line, $row_match )
+			|| (int) $row_match[1] !== count( $draws[ count( $draws ) - 1 ]['rows'] ) + 1
+			|| count( $draws[ count( $draws ) - 1 ]['rows'] ) >= 10
 		) {
 			error_log( 'Gypsy Tarot found an invalid row in lekded.txt.' );
 			return new WP_Error( 'gypsy_tarot_lekded_invalid', 'ข้อมูลเลขเด็ดมีรูปแบบไม่ถูกต้อง' );
 		}
 
-		$rows[] = $columns;
-		if ( 5 === count( $rows ) ) {
-			break;
-		}
+		$draws[ count( $draws ) - 1 ]['rows'][] = array(
+			'rank'  => $row_match[1],
+			'number' => $row_match[2],
+			'score' => $row_match[3] . '%',
+		);
 	}
 
-	if ( empty( $rows ) ) {
-		error_log( 'Gypsy Tarot found no number rows in lekded.txt.' );
+	if ( empty( $draws ) || 10 !== count( $draws[ count( $draws ) - 1 ]['rows'] ) ) {
+		error_log( 'Gypsy Tarot found an incomplete draw in lekded.txt.' );
 		return new WP_Error( 'gypsy_tarot_lekded_empty', 'ยังไม่มีข้อมูลเลขเด็ด' );
 	}
 
 	return array(
-		'topic' => trim( $topic_match[1] ),
-		'rows'  => $rows,
+		'latest_date' => $draws[0]['date'],
+		'draws'       => $draws,
 	);
 }
 
@@ -265,10 +275,10 @@ function gypsy_tarot_seo_head() {
 	}
 
 	if ( gypsy_tarot_is_lekded_page() ) {
-		$lekded_data  = gypsy_tarot_get_lekded_data();
-		$topic        = is_wp_error( $lekded_data ) ? '' : $lekded_data['topic'];
-		$title        = 'เลขเด็ด ' . $topic . ' | ดูแม่นๆ';
-		$description  = 'รวมตัวเลขพร้อมคะแนนและรายละเอียดที่มาของคะแนน' . ( '' !== $topic ? ' สำหรับ' . $topic : '' ) . ' เพื่อประกอบความบันเทิงเท่านั้น ไม่ใช่การรับประกันผล';
+		$lekded_data = gypsy_tarot_get_lekded_data();
+		$draw_date   = is_wp_error( $lekded_data ) ? '' : $lekded_data['latest_date'];
+		$title       = 'เลขเด็ด งวด ' . $draw_date . ' | ดูแม่นๆ';
+		$description = 'รวมเลขเด็ด 10 อันดับพร้อมคะแนนสำหรับงวด ' . $draw_date . ' และผลย้อนหลัง เพื่อประกอบความบันเทิงเท่านั้น ไม่ใช่การรับประกันผล';
 		$url         = home_url( '/lekded/' );
 		?>
 		<meta name="description" content="<?php echo esc_attr( $description ); ?>">
