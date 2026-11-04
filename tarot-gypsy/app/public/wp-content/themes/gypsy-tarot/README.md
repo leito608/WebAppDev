@@ -39,15 +39,23 @@ The `/palm-teller/` page lets visitors optionally ask a question and upload a pa
 
 ## Lucky numbers
 
-The `/lekded/` page reads its topic and up to five table rows from `lekded.txt` in the theme directory. To update the page, edit that text file using this format:
+The `/lekded/` page reads draw history from `lekded.txt` in the theme directory. Keep the newest draw at the top, adding each new 10-number section before the historical sections:
 
 ```text
-topic: งวด 1 พฤศจิกายน 2569
-อันดับ|ตัวเลข|คะแนนรวม|รายละเอียดที่มาของคะแนน
-1|40|300|รายละเอียดคะแนน
+Top 10 candidates for draw on 16/11/2026:
+  1. 64   score 2.69%
+  2. 58   score 2.45%
+  3. 48   score 2.38%
+  4. 98   score 2.31%
+  5. 87   score 2.07%
+  6. 28   score 2.04%
+  7. 57   score 1.99%
+  8. 06   score 1.90%
+  9. 77   score 1.90%
+  10. 14   score 1.80%
 ```
 
-Add up to five data rows after the header. The table is informational and does not guarantee lottery results.
+Each section must have a valid date and exactly 10 consecutively ranked candidates. Preserve two-digit numbers, including a leading zero. The page shows all sections in file order; results are informational and do not guarantee lottery outcomes.
 
 ## Visitor counter
 

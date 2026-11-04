@@ -15,6 +15,9 @@
 			footerAbout: "เกี่ยวกับเรา",
 			footerContact: "ติดต่อเรา",
 			lekdedTitle: "เลขเด็ด",
+			lekdedDrawTitle: "เลขเด็ดงวดวันที่",
+			lekdedNumber: "เลข",
+			lekdedLikelihood: "ความเป็นไปได้",
 			infoEyebrow: "ดูแม่นๆ (Doomanman.com)",
 			privacyTitle: "นโยบายความเป็นส่วนตัว",
 			privacyIntro: "เราเคารพความเป็นส่วนตัวของคุณ และไม่เก็บข้อมูลที่คุณส่งมาเพื่ออ่านไพ่ไว้บนเว็บไซต์หลังประมวลผล",
@@ -52,6 +55,9 @@
 			footerAbout: "About Us",
 			footerContact: "Contact Us",
 			lekdedTitle: "Lucky numbers",
+			lekdedDrawTitle: "Top 10 candidates for draw on",
+			lekdedNumber: "Number",
+			lekdedLikelihood: "Likelihood",
 			infoEyebrow: "ดูแม่นๆ (Doomanman.com)",
 			privacyTitle: "Privacy Policy",
 			privacyIntro: "We respect your privacy and do not retain the information you submit for a reading on this site after processing.",
@@ -98,8 +104,7 @@
 
 		const titleKey = document.querySelector("#info-title").getAttribute("data-i18n");
 		if (titleKey === "lekdedTitle") {
-			const topic = document.querySelector(".lekded-topic");
-			document.title = translations[language][titleKey] + (topic ? " " + topic.textContent : "") + " — ดูแม่นๆ (Doomanman.com)";
+			document.title = translations[language][titleKey] + " — ดูแม่นๆ (Doomanman.com)";
 		} else {
 			document.title = translations[language][titleKey] + " — ดูแม่นๆ (Doomanman.com)";
 		}
