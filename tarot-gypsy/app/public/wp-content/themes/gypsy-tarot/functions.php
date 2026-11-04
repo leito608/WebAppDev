@@ -5,6 +5,8 @@
  * @package Gypsy_Tarot
  */
 
+require_once get_theme_file_path( '/inc/library.php' );
+
 function gypsy_tarot_setup() {
 	add_theme_support( 'title-tag' );
 	add_theme_support( 'post-thumbnails' );
@@ -80,7 +82,7 @@ function gypsy_tarot_dream_teller_query_var( $query_vars ) {
 add_filter( 'query_vars', 'gypsy_tarot_dream_teller_query_var' );
 
 function gypsy_tarot_refresh_dream_teller_route() {
-	$route_version = '5';
+	$route_version = '7';
 	$rules         = get_option( 'rewrite_rules' );
 	// Also flush when the stored rules lack our route (e.g. a database copied from another site).
 	$missing_rule  = is_array( $rules ) && (
@@ -88,6 +90,9 @@ function gypsy_tarot_refresh_dream_teller_route() {
 		|| ! isset( $rules['^palm-teller/?$'] )
 		|| ! isset( $rules['^lekded/?$'] )
 		|| ! isset( $rules['^(privacy-policy|about-us|contact-us)/?$'] )
+		|| ! isset( $rules['^tarot-cards/?$'] )
+		|| ! isset( $rules['^(terms-of-service|disclaimer)/?$'] )
+		|| ! isset( $rules['^en/tarot-cards/?$'] )
 	);
 	if ( $missing_rule || get_option( 'gypsy_tarot_dream_route_version' ) !== $route_version ) {
 		flush_rewrite_rules( false );
@@ -308,7 +313,7 @@ function gypsy_tarot_seo_head() {
 		return;
 	}
 
-	if ( ! is_front_page() || gypsy_tarot_is_info_page() ) {
+	if ( ! is_front_page() || gypsy_tarot_is_info_page() || gypsy_tarot_is_library_page() ) {
 		return;
 	}
 	$title       = 'ดูดวงฟรี ไพ่ยิปซี 3 ใบ | ดูแม่นๆ';
@@ -1205,7 +1210,7 @@ function gypsy_tarot_enqueue_assets() {
 		)
 	);
 
-	if ( gypsy_tarot_is_dream_teller() || gypsy_tarot_is_palm_teller() || is_front_page() ) {
+	if ( gypsy_tarot_is_dream_teller() || gypsy_tarot_is_palm_teller() || ( is_front_page() && ! gypsy_tarot_is_library_page() ) ) {
 		wp_enqueue_script(
 			'gypsy-tarot-share-result',
 			get_theme_file_uri( '/assets/js/share-result.js' ),
@@ -1247,7 +1252,7 @@ function gypsy_tarot_enqueue_assets() {
 				'ajaxUrl' => wp_make_link_relative( admin_url( 'admin-ajax.php' ) ),
 			)
 		);
-	} elseif ( is_front_page() && ! gypsy_tarot_is_info_page() && ! gypsy_tarot_is_lekded_page() ) {
+	} elseif ( is_front_page() && ! gypsy_tarot_is_info_page() && ! gypsy_tarot_is_lekded_page() && ! gypsy_tarot_is_library_page() ) {
 		wp_enqueue_script(
 			'gypsy-tarot-app',
 			get_theme_file_uri( '/assets/js/tarot.js' ),
